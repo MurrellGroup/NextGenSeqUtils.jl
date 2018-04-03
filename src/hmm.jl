@@ -100,13 +100,17 @@ homopolymer_filter(seqs::Array{String}) = homopolymer_filter(seqs, [], [])[1]
 markov_filter = homopolymer_filter
 
 """Filter sequences with "bad" sections in the middle -- abnormally long runs of a single base, and trims bad ends."""
-function homopolymer_filter(seqs::Array, phreds::Array, names::Array;
+function homopolymer_filter(seqs::Array{String,1}, phreds, names;
                        transmat = nothing, obsmat = nothing,
                        initialdist = nothing)
-    newseqs, newphreds, newnames = String[], [], String[]
-    phredsexist = length(phreds) == length(seqs)
-    namesexist = length(names) == length(seqs)
-    if (!phredsexist && length(phreds) > 0) || (!namesexist && length(names) > 0)
+    newseqs = String[]
+    # return empty arrays for newphreds, newnames if params were empty arrays
+    # otherwise if params were nothing, return nothings
+    newphreds= phreds==nothing ? nothing : Vector{Phred}[]
+    newnames = names==nothing ? nothing : String[]
+    phredsexist = (phreds != nothing) && (length(phreds) == length(seqs))
+    namesexist = (names != nothing) && (length(names) == length(seqs))
+    if (!phredsexist && phreds != nothing && length(phreds) > 0) || (!namesexist && names != nothing && length(names) > 0)
         error("Dimension mismatch in names or phreds array")
     end
     if transmat == nothing
@@ -147,7 +151,7 @@ function homopolymer_filter(seqs::Array, phreds::Array, names::Array;
         end
     end
     # may return empty arrays for newphreds and newnames
-    return newseqs, convert(Array{Array{Phred, 1}}, newphreds), newnames
+    return newseqs, newphreds, newnames
 end
 
 """Filter sequences with "bad" sections in the middle -- abnormally long runs of a single base, and trims bad ends.
@@ -164,7 +168,7 @@ function homopolymer_filter(sourcepath::String, destpath::String;
         println("Invalid format! File not written.")
     end
     println("Cleaning $(length(seqs)) sequences")
-    newseqs, newphreds, newnames = markov_filter(seqs, phreds, names, 
+    newseqs, newphreds, newnames = homopolymer_filter(seqs, phreds, names, 
                                                  transmat=transmat, obsmat=obsmat, 
                                                  initialdist=initialdist)
     println("Writing $(length(newseqs)) sequences")

@@ -164,10 +164,13 @@ function length_filter_inds(seqs::Array{String, 1}, minlength::Int, maxlength::I
     return inds
 end
 
-function length_filter(seqs::Array{String, 1}, phreds::Array, names::Array{String, 1},
+function length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void},
                            minlength::Int, maxlength::Int)
     inds = length_filter_inds(seqs, minlength, maxlength)
-    return seqs[inds], phreds[inds], names[inds]
+    seqs = seqs[inds]
+    phreds = (phreds != nothing && length(phreds) > 0) ? phreds[inds] : phreds
+    names = (names != nothing && length(names) > 0) ? names[inds] : names
+    return seqs, phreds, names
 end
 
 function length_filter(seqs::Array{String, 1}, minlength::Int64, maxlength::Int64)
