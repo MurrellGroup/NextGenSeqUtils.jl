@@ -50,11 +50,6 @@ module NextGenSeqUtils
     sparse_aa_kmer_count,
     corrected_kmer_dist,
 
-    # menoise.jl
-
-    menoise,
-    menoise3,
-
     # orient.jl
 
     orient_strands,
@@ -87,43 +82,6 @@ module NextGenSeqUtils
     fixed_diff_evolve,
     pb_seq_sim,
     env_pb_seq_sim,
-
-    # tree.jl
-    
-    NodeData,
-    EmptyNodeData,
-    MyNodeData,
-    TreeNode,
-    roottree,
-    isroot,
-    isleafnode,
-    addchild,
-    insubtree,
-    getnewick,
-    treefromnewick,
-    prettyprintstring,
-    ExtraNodeData,
-    annotatetree,
-    getnodelist,
-    getpattern,
-    getqmatrix,
-    diagonal_ignore_indmin,
-    treebuild,
-    treebuild_upgma,
-    treedepth,
-    getnonleaflist,
-    getleaflist,
-    getdistfromroot,
-    drawtree,
-    gettotaldist,
-    countcrossings,
-    shuffletree,
-    ladderize,
-    drawtreeswithflow,
-    getorder,
-    randopttrees,
-    greedyopttrees,
-    optimize_trees,
 
     # utils.jl
 
