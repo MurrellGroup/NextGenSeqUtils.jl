@@ -1,5 +1,6 @@
 #-------PHREDS AND PROBS--------
 #copypasta from rifraf
+
 const Phred = Int8
 const Prob = Float64
 const LogProb = Float64
@@ -7,36 +8,72 @@ const LogProb = Float64
 const MIN_PHRED = Phred(1)
 const MAX_PHRED = Phred(Int('~') - 33)
 
+"""
+    phred_to_log_p(x)
+
+Conversion from phred value to log probability value.
+"""
 @generated function phred_to_log_p(x)
     return quote
         return x / (-10.0)
     end
 end
 
+"""
+    phred_to_p(q::Phred)
+
+Conversion from phred value to real probability value.
+"""
 function phred_to_p(q::Phred)
     return exp10(phred_to_log_p(q))
 end
 
+"""
+    phred_to_p(x::Vector{Phred})
+
+Conversion from phred values to real probability values in vector.
+"""
 function phred_to_p(x::Vector{Phred})
     return exp10.(phred_to_log_p(x))
 end
 
+"""
+    p_to_phred(p::Prob)
 
+Conversion from real probability value to phred value.
+"""
 function p_to_phred(p::Prob)
     return Phred(min(round(-10.0 * log10(p)), MAX_PHRED))
 end
 
+"""
+    p_to_phred(p::Prob)
+
+Conversion from real probability values to phred values in vector.
+"""
 function p_to_phred(x::Vector{LogProb})
     return Phred[p_to_phred(p) for p in x]
 end
 
+"""
+    error_probs_to_phreds(eps::Vector{Float64})
+
+Conversion from error probability values to phred values in vector.
+"""
 function error_probs_to_phreds(eps::Vector{Float64})
     return [Phred(min(round(-10.0 * log10(p)),99)) for p in eps]
 end
 
 #-------ALTERNATE FILTER FUNCTION----------
 
-function quality_filter(infile,outfile=join(split(infile, ".")[1:end-1], ".") * ".filt.fasta" ; errorRate=0.01,minLength=100,labelPrefix="seq",errorOut = true)
+"""
+    quality_filter(infile, outfile=join(split(infile, ".")[1:end-1], ".") * ".filt.fasta"; 
+                   errorRate = 0.01, minLength = 100, labelPrefix = "seq", errorOut = true)
+
+Writes file with sequences from input file that have all sites within error rate margin.
+"""
+function quality_filter(infile, outfile=join(split(infile, ".")[1:end-1], ".") * ".filt.fasta" ; 
+                        errorRate = 0.01, minLength = 100, labelPrefix = "seq", errorOut = true)
     seqs, scores, names = read_fastq(infile)
     
     inds = quality_filter_inds(seqs, scores, errorRate=errorRate, minLength=minLength)
@@ -55,11 +92,21 @@ function quality_filter(infile,outfile=join(split(infile, ".")[1:end-1], ".") * 
     end
 end
 
+"""
+    quality_filter(seqs::Array{String, 1}, scores::Array, names::Array{String, 1}; errorRate=0.01, minLength=0)
+
+Returns sub arrays with sequences that have site-wise error all within given margin.
+"""
 function quality_filter(seqs::Array{String, 1}, scores::Array, names::Array{String, 1}; errorRate=0.01,minLength=0)
     inds = quality_filter_inds(seqs, scores, errorRate=errorRate, minLength=minLength)
     return seqs[inds], scores[inds], names[inds]
 end
 
+"""
+    quality_filter_inds(seqs::Array{String, 1}, scores::Array; errorRate=0.01,minLength=100)
+
+Returns indices of sequences with site-wise error within given margin.
+"""
 function quality_filter_inds(seqs::Array{String, 1}, scores::Array; errorRate=0.01,minLength=100)
     p_vals = [phred_to_p(score) for score in scores]
     inds = filter!(x -> (mean(p_vals[x]) < errorRate && (length(seqs[x]) >= minLength)) , collect(1:length(seqs)))
@@ -70,6 +117,12 @@ end
 seq_filter = quality_filter
 
 #--------QUALITY INTERROGATING FUNCTIONS, GIVEN EITHER EE NAME TAGGING OR FASTQ FORMAT ------- 
+
+"""
+    length_vs_qual(fasta_path; plot_title = "Length Vs Errors")
+
+Creates plot of lengths of sequences vs. mean error rates of sequences.
+"""
 function length_vs_qual(fasta_path; plot_title = "Length Vs Errors")
 	
 	if last(fasta_path) == 'a'
@@ -92,6 +145,11 @@ function length_vs_qual(fasta_path; plot_title = "Length Vs Errors")
     # return dithered_rates
 end
 
+"""
+    qual_hist(fasta_path; plot_title = "Quality Hist")
+
+Creates histogram of mean quality scores per sequence.
+"""
 function qual_hist(fasta_path; plot_title = "Quality Hist")
 	if last(fasta_path) == 'a'
 		names, seqs = read_fasta_with_names(fasta_path)

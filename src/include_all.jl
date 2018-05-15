@@ -1,5 +1,6 @@
 using Reexport
 
+# reexport gives the Levenshtein function in scope of file with "include" call
 @reexport using Levenshtein
 using BioSequences
 import BioSequences: reverse_complement

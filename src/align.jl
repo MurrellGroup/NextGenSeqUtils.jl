@@ -1,6 +1,9 @@
 """
+    nw_align(s1::String, s2::String; edge_reduction = 0.99)
+
 Returns aligned strings using the Needleman-Wunch Algorithm (quadratic), 
-with end gaps penalized slightly less.
+with end gaps penalized slightly less. edge_reduction is a multiplier (usually
+less than one) on gaps on end of strings.
 """
 function nw_align(s1::String, s2::String; edge_reduction = 0.99)
     # edge_reduction is a multiplicative score that gets multiplied to
@@ -103,7 +106,12 @@ end
 
 #--------Banded alignment---------
 
-"""Wrapper for nw_align and banded_nw_align."""
+"""
+    nw_align(s1::String, s2::String, banded::Float64)
+
+Wrapper for `nw_align` and `banded_nw_align`. A larger `banded` value makes alignment slower
+but more accurate.
+"""
 function nw_align(s1::String, s2::String, banded::Float64)
     if banded <= 0
         return nw_align(s1, s2)
@@ -111,6 +119,8 @@ function nw_align(s1::String, s2::String, banded::Float64)
         return banded_nw_align(s1, s2, band_coeff = banded)
     end
 end
+
+# methods for converting from rectangular coordinates to diagonal band coordinates and back
 
 """Sets value in band at `i`, `j` to `val`, where `i` and `j` are in square matrix coords, `dim_diff` = ncols - nrows"""
 function add_to_band!(band, val, i::Int, j::Int, bandwidth::Int, dim_diff::Int)
@@ -136,10 +146,12 @@ function in_band(i, j, bandwidth, dim_diff)
 end
 
 """
+    banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coeff = 1)
+
 Like nw_align, but sub quadratic by only computing values within a band around the center diagonal.
 One 'band' of radius 3 = (4,1), (3,1), (2,1), (1,1), (1,2), (1,3), (1,4), aka upside-down L shape.
 band_coeff = 1 is sufficient to get same alignments as nw_align for 10% diverged sequences ~97% of the time;
-increase for more conservative alignment with longer computation time.
+increase this value for more conservative alignment with longer computation time.
 Radius of band = `bandwidth` = `band_coeff` * sqrt(avg seq length)
 """
 function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coeff = 1)
@@ -263,11 +275,14 @@ end
 #----Triplet/Codon Alignment----
 
 """
+    triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundary_mult = 2)
+
 Returns alignment of two sequences where `s1` is a reference with reading frame to be preserved and `s2` is a query sequence.
-`boundary_mult` usually works best on range 0 to 3, higher for more strongly enforced gaps 
-aligned on reference frame (divisible-by-3 indices)
+`boundary_mult` adjusts penalties for gaps preserving the reading frame of `s1`.
+This usually works best on range 0 to 3, higher values for more strongly enforced gaps aligned on 
+reference frame (divisible-by-3 indices)
 """
-function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundary_mult = 2)                
+function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundary_mult = 2)
     # edge_reduction is a multiplicative score that gets multiplied to          
     # the penalties along the edges, to prefer terminal gaps.                   
     ins_cost = -1.0  # -> : horizontal                                          
@@ -407,13 +422,19 @@ codon_nw_align = triplet_nw_align
 #-------Local Alignment--------
 
 """
-Aligns a reference and query sequence locally. rightaligned=true keeps the
-right ends of each sequence in final alignment; refend keeps the beginning/left
-end of `ref`. If you want to keep both ends of both strings, use nw_align.
+    local_align(ref::String, query::String; mismatch_score = -1, 
+                match_score = 1, gap_penalty = -1, 
+                rightaligned=true, refend = false)
+
+Aligns a query sequence locally to a reference. If true, `rightaligned` keeps the
+right ends of each sequence in final alignment- otherwise they are trimmed; 
+`refend` keeps the beginning/left end of `ref`. 
+If you want to keep both ends of both strings, use nw_align.
+For best alignments use the default score values.
 """
 function local_align(ref::String, query::String; mismatch_score = -1, 
-                            match_score = 1, gap_penalty = -1, 
-                            rightaligned=true, refend = false)
+                     match_score = 1, gap_penalty = -1, 
+                     rightaligned=true, refend = false)
     s1 = ref
     s2 = query
     # Populate Scores
@@ -495,13 +516,13 @@ function local_align(ref::String, query::String; mismatch_score = -1,
             ali1arr[k] = '-'
             ind2 += 1
         else
-            error("OHNO")
+            error("error in local_align: alignment score matrix has invalid values")
         end
     end
     return join(reverse(ali1arr)), join(reverse(ali2arr))
 end
 
-#--------Kmer internals---------
+#--------Kmer_seeded_align internals---------
 
 """
 Sets value of key in dictionary to given index, unless the key already exists, 
@@ -697,7 +718,9 @@ end
 
 """
 Find longest increasing subsequence of second column of given array.
-Used to resolve bad orders of word matches while preserving as many matches as possible
+Used to resolve bad orders of word matches while preserving as many matches as possible.
+Because the first column (match locations in the first sequence) is sorted, corresponding
+matches in the second column must be sorted, so we get the maximum number of such matches.
 """
 function longest_incr_subseq(arr::Array{Int, 2})
     len = size(arr)[1]
@@ -738,9 +761,23 @@ function longest_incr_subseq(arr::Array{Int, 2})
 end
 
 
+#--------end of Kmer_seeded_align internals---------
+
+
+
 """
-Returns aligned strings, where alignment is first done with word matches and 
-then Needleman-Wunsch on intermediate intervals.
+    kmer_seeded_align(s1::String, s2::String;
+                      wordlength = 30,
+                      skip = 10,
+                      aligncodons = false,
+                      banded = 1.0,
+                      debug::Bool = false)
+
+Returns aligned strings, where alignment is first done with larger word matches and 
+then (possibly banded) Needleman-Wunsch on intermediate intervals.
+`skip` gives a necessary gap between searched-for words in `s1`.
+For best results, use the default `wordlength` and `skip` values.
+See `nw_align` for explanation of `banded`.
 """
 function kmer_seeded_align(s1::String, s2::String;
                            wordlength = 30,
@@ -748,7 +785,8 @@ function kmer_seeded_align(s1::String, s2::String;
                            aligncodons = false,
                            banded = 1.0,
                            debug::Bool = false)
-    # ToDo:
+
+    # ToDo (i think we tried this and it had insignificant speed up):
     # 1: Make this recurse. So instead fo calling nw_align on the set
     # of mismatches strings, it calls itself, but with a lower word
     # length. This will help for really noisy sequences.
@@ -767,7 +805,8 @@ function kmer_seeded_align(s1::String, s2::String;
         if matches_are_inconsistent(sorted)
             println("Notice: Word matching produced inconsistent ordering.",
                     " Consider a larger word size. Returning full DP alignment.",
-                    "\nNote: this message shouldn't print.")
+                    "\nNote: this message shouldn't print with code changes. If it does,
+                    check kner_seeded_align helper methods.")
             return nw_align(s1, s2, banded)
         end
     end
@@ -798,9 +837,19 @@ function kmer_seeded_align(s1::String, s2::String;
 end
 
 """
+    triplet_kmer_seeded_align(s1::String, s2::String;
+                              wordlength = 30,
+                              skip = 9,
+                              boundary_mult = 2,
+                              alignedcodons = true,
+                              debug::Bool=false)
+
 Returns aligned strings, where alignment is first done with word matches and 
 then Needleman-Wunsch on intermediate intervals, prefering to preserve the 
 reading frame of the first arg `s1`.
+`skip` gives a necessary gap between searched-for words in `s1`.
+For best results, use the default `wordlength` and `skip` values.
+See `triplet_nw_align` for explanation of `boundary_mult`.
 """
 function triplet_kmer_seeded_align(s1::String, s2::String;
                            wordlength = 30,
@@ -850,20 +899,28 @@ function triplet_kmer_seeded_align(s1::String, s2::String;
 end
 
 """
+    function local_kmer_seeded_align(s1::String, s2::String;
+                                     wordlength = 30,
+                                     skip = 10,
+                                     trimpadding = 100,
+                                     debug::Bool=false)
+
 Returns locally aligned strings, where alignment is first done with word matches and 
 then Needleman-Wunsch on intermediate intervals.
 
 `s1` is a reference to align to, and `s2` is a query to extract a local match from.
 `s2` may be trimmed or expanded with gaps.
 Before locally aligning ends of sequences, the ends of `s2` are trimmed to length
-`trimpadding` for faster alignment.
+`trimpadding` for faster alignment. Increasing this will possible increase alignment accuracy
+but effect runtime.
+`skip` gives a necessary gap between searched-for words in `s1`.
+For best results, use the default `wordlength` and `skip` values.
 """
 function local_kmer_seeded_align(s1::String, s2::String;
-
-                           wordlength = 30,
-                           skip = 10,
-                           trimpadding = 100,
-                           debug::Bool=false)
+                                   wordlength = 30,
+                                   skip = 10,
+                                   trimpadding = 100,
+                                   debug::Bool=false)
     if s1 == "" || s2 == ""
         return local_align(s1, s2, rightaligned=false)
     end
@@ -928,8 +985,18 @@ end
 
 loc_kmer_seeded_align = local_kmer_seeded_align
 
-"""If aa_matches = true, will attempt to find amino acid matches in any reference frame, 
-and add the nucleotide Hamming distance of these matches to Levenshtein distances of mismatches."""
+"""
+    kmer_seeded_edit_dist(s1::String , s2::String;
+                          wordlength = 30,
+                          skip = 5,
+                          aa_matches = false)
+
+Computes levenshtein edit distance with speedups from only computing the dp scoring matrix between word matches.
+If aa_matches = true, will attempt to find amino acid matches in any reference frame, 
+and add the nucleotide Hamming distance of these matches to Levenshtein distances of mismatches.
+`skip` gives a necessary gap between searched-for words in `s1`.
+For best results, use the default `wordlength` and `skip` values.
+"""
 function kmer_seeded_edit_dist(s1::String , s2::String;
                                wordlength = 30,
                                skip = 5,
@@ -985,8 +1052,15 @@ function kmer_seeded_edit_dist(s1::String , s2::String;
     return matched_diffs + sum([levenshtein(mismatch1[i], mismatch2[i]) for i in 1:length(mismatch1)])
 end
 
-"""Called on aligned strings. Resolves `query` with respect to `ref`. `mode` = 1 for resolving single indels, `mode` = 2 for resolving single indels and codon insertions in query."""
+
 resolve_alignments(alignments::Array{String, 1}; mode = 1) = resolve_alignments(alignments[1], alignments[2], mode = mode)
+
+"""
+    resolve_alignments(ref::String, query::String; mode = 1)
+
+Called on aligned strings. Resolves `query` with respect to `ref`. 
+`mode` = 1 for resolving single indels, `mode` = 2 for resolving single indels and codon insertions in query.
+"""
 function resolve_alignments(ref::String, query::String; mode = 1)
     if length(ref) != length(query)
         error("Arguments must be aligned")
@@ -1015,11 +1089,15 @@ function resolve_alignments(ref::String, query::String; mode = 1)
     return degap(ref), degap(query)
 end
 
-"""Takes `clusters` = [consensussequences, clustersizes], chooses references
+"""
+    align_reading_frames(clusters; k = 6, thresh = 0.03, verbose = false)
+
+Takes `clusters` = [consensus_sequences, cluster_sizes], chooses references
 out of consensuses that do not have stop codons in the middle, and makes all
 consensus sequence reading frames agree. Returns resolved consensus seqs
-(`goods`) along with filtered out consensus seqs with >`thresh` divergent from
+(`goods`) along with filtered out consensus seqs that are >`thresh` divergent from
 nearest reference (`bads`).
+`k` = kmer size for computing kmer vectors of sequences.
 """
 function align_reading_frames(clusters; k = 6, thresh = 0.03, verbose = false)
     consensuses = clusters[1]
@@ -1074,7 +1152,10 @@ end
 
 align_reference_frames = align_reading_frames
 
+
 """
+    local_edit_dist(s1::String, s2::String)
+
 Returns the edit distance between two sequences after local alignment
 """
 function local_edit_dist(s1::String, s2::String)

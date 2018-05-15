@@ -1,8 +1,19 @@
-"""
-Methods for HMM for parsing reads of sequences. Currently works specifically for that.
-"""
+# Methods for HMM for parsing reads of sequences.
 
-# Return viterbi path and log probability for that path. Takes logs of matrices.
+"""
+Column index for each nucleotide in observation matrix.
+"""
+const NUCLEOTIDE_COLS = Dict('A' => UInt8(1),
+                             'C' => UInt8(2),
+                             'G' => UInt8(3),
+                             'T' => UInt8(4));
+
+"""
+    viterbi_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
+
+Return viterbi path and log probability for that path. Takes logs of matrices.
+`observations_given_states` has # rows = # states, # columns = # steps of markov process.
+"""
 function viterbi_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
     numstates, numsteps = size(observations_given_states)
     scores = zeros(numstates, numsteps)
@@ -28,13 +39,17 @@ function viterbi_logs(observations_given_states::Array{Float64, 2}, transitions:
     return path, maximum(scores[:, end])
 end
 
-"""Return 5x5 transition matrix with given transition probabilities
+"""
+    trans_mat(; uniform_cycle_prob = 0.9999999999, homopoly_cycle_prob = 0.98)
+
+Return 5x5 transition matrix with given transition probabilities
 State 1 -- uniform observation distribution.
 State 2 -- High "A" observation likelihood.
 State 3 -- High "C" observation likelihood.
 State 4 -- High "G" observation likelihood.
 State 5 -- High "T" observation likelihood.
-Each state has high return likelihood."""
+Each state has high likelihood to return to state 1.
+States 2 through 5 represent high likelihood of homopolymer regions of respective nuc."""
 function trans_mat(; uniform_cycle_prob = 0.9999999999, homopoly_cycle_prob = 0.98)
     uh_prob = (1-uniform_cycle_prob) / 4
     hu_prob = 1 - homopoly_cycle_prob
@@ -52,12 +67,18 @@ function trans_mat(; uniform_cycle_prob = 0.9999999999, homopoly_cycle_prob = 0.
     return T
 end
 
-"""Return 5x4 observation matrix with given probabilities.
+"""
+    obs_mat(; homopoly_prob = 0.99)
+
+Return 5x4 observation matrix with given probabilities.
 State 1 -- uniform observation distribution.
 State 2 -- High "A" observation likelihood.
 State 3 -- High "C" observation likelihood.
 State 4 -- High "G" observation likelihood.
-State 5 -- High "T" observation likelihood."""
+State 5 -- High "T" observation likelihood.
+Columns are in same order as columns 2 through 5
+(the last four rows give a symmetric matrix).
+"""
 function obs_mat(; homopoly_prob = 0.99)
     uniform_prob = 0.25
     not_hpoly_prob = (1-homopoly_prob) / 3
@@ -75,19 +96,22 @@ function obs_mat(; homopoly_prob = 0.99)
     return O
 end
 
-"""Initial state distributions: 5x1 vector"""
+"""
+    initial_dist(; uniform_state = 0.99)
+
+Initial state distributions: see `trans_mat` for state descriptions. 5x1 vector.
+"""
 function initial_dist(; uniform_state = 0.99)
     not_unistate = (1 - uniform_state) / 4
     return [uniform_state; not_unistate; not_unistate; not_unistate; not_unistate]
 end
 
-"""Column index for each nucleotide in observation matrix."""
-const NUCLEOTIDE_COLS = Dict('A' => UInt8(1),
-                             'C' => UInt8(2),
-                             'G' => UInt8(3),
-                             'T' => UInt8(4));
+"""
+    get_obs_given_state(observation_matrix::Array{Float64,2}, observation_seq::String)
 
-"""Populate 5xT matrix with likelihood of observation at each time step given each state."""
+Populate 5xT matrix with likelihood of observation at each of T time steps given each 
+nucleotide in `observation_seq`.
+"""
 function get_obs_given_state(observation_matrix::Array{Float64,2}, observation_seq::String)
     obs_given_state = zeros(length(observation_seq), 5)
     for (i, nuc) in enumerate(observation_seq)
@@ -99,7 +123,17 @@ end
 homopolymer_filter(seqs::Array{String}) = homopolymer_filter(seqs, [], [])[1]
 markov_filter = homopolymer_filter
 
-"""Filter sequences with "bad" sections in the middle -- abnormally long runs of a single base, and trims bad ends."""
+"""
+    homopolymer_filter(seqs::Array{String,1}, phreds, names;
+                       transmat = nothing, obsmat = nothing,
+                       initialdist = nothing)
+
+Filter sequences with "bad" sections in the middle -- abnormally long runs of a single base, using
+viterbi alg inference. If this homopolymer occurs on one end of a sequence, keeps sequence and trims
+homopolymer region off end. `phreds` and/or `names` may be `nothing`, in which case `nothing` is returned
+for the respective field. If transition, observation, initial distribution matrices not provided (default)
+then the default values from the respective constructors are used.
+"""
 function homopolymer_filter(seqs::Array{String,1}, phreds, names;
                        transmat = nothing, obsmat = nothing,
                        initialdist = nothing)
@@ -154,8 +188,16 @@ function homopolymer_filter(seqs::Array{String,1}, phreds, names;
     return newseqs, newphreds, newnames
 end
 
-"""Filter sequences with "bad" sections in the middle -- abnormally long runs of a single base, and trims bad ends.
-Reads from sourcepath file and writes filtered sequences to destpath file."""
+"""
+    homopolymer_filter(sourcepath::String, destpath::String;
+                       transmat = nothing, obsmat = nothing,
+                       initialdist = nothing, format="fastq")
+
+Filter sequences with "bad" sections in the middle -- abnormally long runs of a single base, using
+viterbi alg inference. If this homopolymer occurs on one end of a sequence, keeps sequence and trims
+homopolymer region off end. Takes a file path for each of a source file of type `format` (which may be "fasta" or "fastq")
+and a destination file is written which is the same file type.
+"""
 function homopolymer_filter(sourcepath::String, destpath::String;
                        transmat = nothing, obsmat = nothing,
                        initialdist = nothing, format="fastq")
@@ -179,7 +221,12 @@ function homopolymer_filter(sourcepath::String, destpath::String;
     end     
 end
 
-"""Compute logs of forward scores. Takes logs of matrices."""
+"""
+    forward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
+
+Compute logs of forward scores. Takes logs of matrices as inputs.
+`observations_given_states` has # rows = # states, # columns = # steps of markov process.
+"""
 function forward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
     numstates, numsteps = size(observations_given_states)
     fwds = zeros(numstates, numsteps)
@@ -194,7 +241,12 @@ function forward_logs(observations_given_states::Array{Float64, 2}, transitions:
     return fwds
 end
 
-"""Compute logs of backward scores and individual posterior probabilities. Takes logs of matrices."""
+"""
+    backward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
+
+Compute logs of backward scores and individual posterior probabilities. Takes logs of matrices as inputs.
+`observations_given_states` has # rows = # states, # columns = # steps of markov process.
+"""
 function backward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
     numstates, numsteps = size(observations_given_states)
     bwds = zeros(numstates, numsteps)
@@ -209,12 +261,18 @@ function backward_logs(observations_given_states::Array{Float64, 2}, transitions
     return bwds
 end
 
-"""Compute logs of forward-backward scores and individual probabilities. Takes logs of matrices."""
+"""
+    forward_backward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
+
+Compute logs of forward-backward scores and individual probabilities. Takes logs of matrices as inputs.
+`observations_given_states` has # rows = # states, # columns = # steps of markov process.
+"""
 function forward_backward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
     numstates, numsteps = size(observations_given_states)
     fwds = forward_logs(observations_given_states, transitions, initials)
     bwds = zeros(numstates, numsteps)
-    # Backwards pass - Compute manually to compute individual probabilities simultaneously
+    # Backwards pass - Compute manually in order to compute individual probabilities simultaneously 
+    # - saves an extra pass through observations arrays
     bwds[:, end] = 1  # arbitrarily initialized
     log_posteriors = zeros(numstates, numsteps)
     for t in numsteps-1:-1:1
@@ -233,7 +291,11 @@ function forward_backward_logs(observations_given_states::Array{Float64, 2}, tra
     return log_posteriors
 end
 
-"""Generate a sequence given a model. Can create bad reads (long runs of a single base)"""
+"""
+    gen_seq_with_model(n::Int, trans_mat, obs_mat, initial_dists)
+
+Generate a sequence given a markov model. May create bad reads (long runs of a single base).
+"""
 function gen_seq_with_model(n::Int, trans_mat, obs_mat, initial_dists)
     state_seq = zeros(Int, n)
     state_seq[1] = wsample(collect(1:5), trans_mat*initial_dists)
@@ -245,7 +307,11 @@ function gen_seq_with_model(n::Int, trans_mat, obs_mat, initial_dists)
     return obs_seq
 end
 
-"""Draw flagged sites with capital letters, safe sites with lowercase"""
+"""
+    viterbiprint(s::String)
+
+Draw flagged sites with capital letters, safe sites with lowercase.
+"""
 function viterbiprint(s::String)
     obs = get_obs_given_state(obs_mat(), s)
     v = viterbi_logs(log.(obs),log.(trans_mat()),log.(initial_dist()))
@@ -258,4 +324,3 @@ function viterbiprint(s::String)
     end
     return join(s)
 end
-

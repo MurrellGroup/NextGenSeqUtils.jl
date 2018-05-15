@@ -1,4 +1,10 @@
-"""Orients strands relative to a reference sequence."""
+"""
+    orient_strands(seqs::Array{String}, phreds::Union{Array{Vector{Phred},1},Void}, 
+                   names::Union{Array{String,1},Void}, ref::String; k::Int=6)
+
+Orients sequences (with phreds and names, which may be `nothing`) relative to a reference sequence.
+`k` is kmer size for computing kmer vectors.
+"""
 function orient_strands(seqs::Array{String}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void}, ref::String; k::Int=6)
     kmers = [kmer_count(s, k) for s in seqs]
     ref_kmer = kmer_count(ref, k)
@@ -9,10 +15,20 @@ function orient_strands(seqs::Array{String}, phreds::Union{Array{Vector{Phred},1
     return orient_strands(seqs, phreds, names, ref, kmers, ref_kmer, rev_ref_kmer)
 end
 
-"""Orients strands relative to a reference sequence."""
+"""
+    orient_strands(seqs::Array{String}, ref::String; k::Int=6)
+
+Orients sequences relative to a reference sequence.
+`k` is kmer size for computing kmer vectors.
+"""
 orient_strands(seqs::Array{String}, ref::String; k::Int=6) = orient_strands(seqs, nothing, nothing, ref, k=k)[1]
 
-"""Orients strands relative to a reference sequence."""
+"""
+    orient_strands(seqs::Array{String,1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void}, 
+                        ref::String, kmers::Array{Array{T,1},1}, ref_kmer::Array{T,1}, rev_ref_kmer::Array{T,1}) where {T <: Real}
+
+Orients sequences with given kmer vectors relative to a reference sequence with given kmer vector.
+"""
 function orient_strands(seqs::Array{String,1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void}, 
                         ref::String, kmers::Array{Array{T,1},1}, ref_kmer::Array{T,1}, rev_ref_kmer::Array{T,1}) where {T <: Real}
     oriented = String[]
@@ -45,8 +61,13 @@ function orient_strands(seqs::Array{String,1}, phreds::Union{Array{Vector{Phred}
     return oriented, newphreds, newnames
 end
 
-"""Orients each sequence in `seqs` to nearest reference sequence in `refspath`.
-Distance determined by amino acid similarity (kmer vector dot prod)"""
+"""
+    orient_to_refs_file(seqs::Array{String,1}, phreds::Union{Array{Vector{Phred},1},Void}, 
+                        names::Union{Array{String,1},Void}, refspath::String)
+
+Orients each sequence in `seqs` to nearest reference sequence in panel of references (`refspath`).
+Distance determined by amino acid similarity (kmer vector dot prod).
+"""
 function orient_to_refs_file(seqs::Array{String,1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void}, refspath::String)
     if length(refspath) < 5
         return seqs
@@ -61,8 +82,13 @@ function orient_to_refs_file(seqs::Array{String,1}, phreds::Union{Array{Vector{P
     return orient_to_refs(seqs, phreds, names, refs)
 end
 
-"""Orients each sequence in `seqs` to nearest reference sequence in `refs`.
-Distance determined by amino acid similarity (kmer vector dot prod)"""
+"""
+    orient_to_refs(seqs::Array{String,1}, phreds::Union{Array{Vector{Phred},1},Void}, 
+                   names::Union{Array{String,1},Void}, refs::Array{String,1}; k::Int = 6)
+
+Orients each sequence in `seqs` to nearest reference sequence in panel of references (`refs`).
+Distance determined by amino acid similarity (kmer vector dot prod).
+"""
 function orient_to_refs(seqs::Array{String,1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void}, refs::Array{String,1}; k::Int = 6)
     if length(refs) == 0
         println("Not orienting: no reference sequences")
@@ -111,6 +137,8 @@ function orient_to_refs(seqs::Array{String,1}, phreds::Union{Array{Vector{Phred}
     return [o[1] for o in oriented], phredsexist ? [o[2] for o in oriented] : nothing, namesexist ? [o[3] for o in oriented] : nothing
 end
 
+#=
 """Orient sequences without separate references. Coarse clusters and takes
 refined consensus of largest cluster as reference"""
-#function orient_strands(seqs::Array{String, 1}; radius = 0.3, k = 4)
+function orient_strands(seqs::Array{String, 1}; radius = 0.3, k = 4)
+=#

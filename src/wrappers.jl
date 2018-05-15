@@ -1,4 +1,12 @@
 #------USEARCH WRAPPERS---------
+
+"""
+    usearch_filter(inFastqPath, outFastXPath;
+                   errorRate=0.01, minLength=100,
+                   labelPrefix="seq", errorOut=true)
+
+Julia wrapper for usearch error rate filter. Input file may be .fastq or .fasta.
+"""
 function usearch_filter(inFastqPath, outFastXPath;
                         errorRate=0.01, minLength=100,
                         labelPrefix="seq", errorOut=true)
@@ -17,6 +25,13 @@ function usearch_filter(inFastqPath, outFastXPath;
     run(`$(PATHS.usearch) -fastq_filter $inFastqPath -fastq_maxee_rate $errorRate -fastq_qmax 99 -fastq_minlen $minLength $outputTypeString $outFastXPath -relabel $labelPrefix $errorOutString`)
 end
 
+
+"""
+    usearch_ref(inFastXPath, outFastaPath, referenceString;
+                     divergence=0.9)
+
+Julia wrapper for usearch.
+"""
 function usearch_ref(inFastXPath, outFastaPath, referenceString;
                      divergence=0.9)
     tempRefPath = "/tmp/usearch9tempRefFile"
@@ -30,6 +45,12 @@ function usearch_ref(inFastXPath, outFastaPath, referenceString;
     return names2nd, seqs2nd
 end
 
+"""
+    usearch_ref_database(inFastXPath, outFastaPath, referencePath;
+                         divergence=0.9)
+
+Julia wrapper for usearch.
+"""
 function usearch_ref_database(inFastXPath, outFastaPath, referencePath;
                               divergence=0.9)
     tempOutPath = "/tmp/usearch9tempOutFile"
@@ -42,6 +63,11 @@ function usearch_ref_database(inFastXPath, outFastaPath, referencePath;
 end
 
 #-------MAFFT WRAPPER--------
+"""
+    mafft(inpath, outpath; path="", flags::Vector{String}=String[], kwargs...)
+
+Julia wrapper for mafft.
+"""
 function mafft(inpath, outpath; path="", flags::Vector{String}=String[], kwargs...)
     mafft = length(path) == 0 ? PATHS.mafft : path
     flagstrings = []
@@ -56,6 +82,11 @@ function mafft(inpath, outpath; path="", flags::Vector{String}=String[], kwargs.
     run(`$mafft $flagstrings $args --quiet --adjustdirection --progress /tmp/mafft.progress --out $outpath $inpath`)
 end
 
+"""
+    mafft_consensus{T<:BioSequence}(seqs::Vector{T}; kwargs...)
+
+Julia wrapper for mafft.
+"""
 function mafft_consensus{T<:BioSequence}(seqs::Vector{T}; kwargs...)
     mktempdir() do mydir
         seqfile = string(mydir, "/sequences.fasta")

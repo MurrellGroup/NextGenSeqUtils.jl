@@ -1,5 +1,9 @@
 #------Distance Matrix Functions--------
-"""distances[i, j] is distance from distr1[i] to distr2[j]"""
+"""
+    dist_matrix(distr1, distr2; dist_met = kmer_seeded_edit_dist)
+
+distances[i, j] is distance from distr1[i] to distr2[j].
+"""
 function dist_matrix(distr1, distr2; dist_met = kmer_seeded_edit_dist)
     if distr1 == distr2
         return symmetric_dist_matrix(distr1, dist_met = dist_met)
@@ -14,7 +18,12 @@ function dist_matrix(distr1, distr2; dist_met = kmer_seeded_edit_dist)
     return distances
 end
 
-"""similar to dist_matrix but where distr1 == distr2. Automatically called by dist_matrix"""
+"""
+    symmetric_dist_matrix(distr; dist_met = kmer_seeded_edit_dist)
+
+Similar to dist_matrix but where distr1 == distr2. 
+Automatically called by dist_matrix if the two distributions are identical.
+"""
 function symmetric_dist_matrix(distr; dist_met = kmer_seeded_edit_dist)
     distances = zeros(length(distr), length(distr))
     for i in 1:length(distr)
@@ -27,7 +36,11 @@ end
 
 
 #-------OTHER UTILITY FUNCTIONS----------
-"""Prints fasta format to the terminal, for copypasting into alignment/blast etc."""
+"""
+    print_fasta(seqs, names)
+
+Prints fasta format to the terminal, for copypasting into alignment/blast etc.
+"""
 function print_fasta(seqs, names)
     for i in 1:length(seqs)
         println(">", names[i])
@@ -35,24 +48,47 @@ function print_fasta(seqs, names)
     end
 end
 
+"""
+    degap(s::String)
+
+Returns given string without '-' gap symbols.
+"""
 function degap(s::String)
     return replace(s, "-", "")
 end
 
+"""
+    degap(s::DNASequence)
+
+Returns given string without '-' gap symbols.
+"""
 function degap(s::DNASequence)
     return DNASequence(degap(String(s)))
 end
 
+"""
+    dash_count(inStr::String)
+
+Counts number of gap symbols '-' in given string.
+"""
 function dash_count(inStr::String)
     sum([char == '-' for char in inStr])
 end
 
-"""true if `str` has a single gap '-' at index `ind`, else false"""
+"""
+    single_gap(str::String, ind::Int)
+
+True if `str` has a single gap '-' at index `ind`, else false.
+"""
 function single_gap(str::String, ind::Int)
     return str[ind] == '-' && (ind == 1 || str[ind-1] != '-') && (ind == length(str) || str[ind+1] != '-')
 end
 
-"""true if `str` has a gap length of 1 mod 3"""
+"""
+    single_mod_three_gap(str::String, ind::Int)
+
+True if `str` has a gap length of 1 mod 3 at given index.
+"""
 function single_mod_three_gap(str::String, ind::Int)
     hi = ind
     while hi <= length(str) && str[hi] == '-'
@@ -65,7 +101,11 @@ function single_mod_three_gap(str::String, ind::Int)
     return (hi - lo - 1)%3 == 1
 end
 
-"""True if index is within a gap of length a multiple of three, else false"""
+"""
+    triple_gap(str::String, ind::Int)
+
+True if index is within a gap of length a multiple of three, else false.
+"""
 function triple_gap(str::String, ind::Int)
     hi = ind
     while hi <= length(str) && str[hi] == '-'
@@ -78,6 +118,11 @@ function triple_gap(str::String, ind::Int)
     return (hi - lo - 1)%3 == 0
 end
 
+"""
+    seq_details(fasta_path)
+
+Gives names, sequences, error rates, and lengths from given filepath, which may end in '.fasta' or '.fastq'.
+"""
 function seq_details(fasta_path)
 	if last(fasta_path) == 'a'
 		names, seqs = read_fasta_with_names(fasta_path)
@@ -90,15 +135,29 @@ function seq_details(fasta_path)
     return names, seqs, error_rates, string_lengths
 end
 
+"""
+    print_rgb(r, g, b, t)
+
+Prints in colors `r`,`g`,`b` to terminal.
+"""
 function print_rgb(r, g, b, t)
     print("\e[1m\e[38;2;$r;$g;$b;249m", t)
 end
 
-# maybe a solution that doesn't rely on DNASequence objects
+"""
+    reverse_complement(dna_string::String)
+
+Returns the complement of the reverse of given nucleotide sequence.
+"""
 function reverse_complement(dna_string::String)
     return String(reverse_complement(DNASequence(dna_string)))
 end
 
+"""
+    print_diffs(s1, s2; width=5, prefix="")
+
+Prints two already aligned sequences with differences in color to terminal.
+"""
 function print_diffs(s1, s2; width=5, prefix="")
     if length(s1) != length(s2)
         error("Aligned strings are meant to be the same length.")
@@ -120,8 +179,11 @@ function print_diffs(s1, s2; width=5, prefix="")
     end
 end
 
-"""Align `seq` to `ref` and trim insertions on the ends of `seq`.
+"""
+    trim_ends_indices(seq, ref; edge_reduction=0.1)
 
+Align `seq` to `ref` with default low penalties for gaps on ends, 
+and trim insertions on the ends of `seq`. 
 Returns (start, stop) indices.
 """
 function trim_ends_indices(seq, ref; edge_reduction=0.1)
@@ -141,13 +203,20 @@ end
 
 #----Amino Acids---
 
-"""Return amino acid string given sequence using BioJulia"""
+"""
+    translate_to_aa(s::String)
+
+Return amino acid string translation of nucleotide sequence using BioSequences conversion.
+"""
 function translate_to_aa(s::String)
     rna = convert(RNASequence, DNASequence(s))
     return string(translate(rna))
 end
 
-"""Return sequence translated to amino acids in each reference frame
+"""
+    generate_aa_seqs(str::String)
+
+Return sequence translated to amino acids in each reading frame
 (returns three amino acid sequences)."""
 function generate_aa_seqs(str::String)
     aa1 = translate_to_aa(str[1:length(str) - length(str)%3])
@@ -158,12 +227,22 @@ end
 
 #----Length Filtering----
 
-"""Filters sequences by length"""
+"""
+    length_filter_inds(seqs::Array{String, 1}, minlength::Int, maxlength::Int)
+
+Return indices of sequences in given array with length within given range (inclusive).
+"""
 function length_filter_inds(seqs::Array{String, 1}, minlength::Int, maxlength::Int)
     inds = map(s->(minlength <= length(s) <= maxlength), seqs)
     return inds
 end
 
+"""
+    length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void},
+                  minlength::Int, maxlength::Int)
+
+Filter sequences and corresponding names and phreds (which may be `nothing`) by length.
+"""
 function length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void},
                            minlength::Int, maxlength::Int)
     inds = length_filter_inds(seqs, minlength, maxlength)
@@ -173,16 +252,31 @@ function length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred}
     return seqs, phreds, names
 end
 
+"""
+    length_filter(seqs::Array{String, 1}, minlength::Int64, maxlength::Int64)
+
+Filter sequences by length.
+"""
 function length_filter(seqs::Array{String, 1}, minlength::Int64, maxlength::Int64)
     inds = length_filter_inds(seqs, minlength, maxlength)
     return seqs[inds]
 end
 
+"""
+    filter_by_length(args...)
+
+Deprecated. See `length_filter`.
+"""
 function filter_by_length(args...)
     Base.depwarn("Use length_filter instead.", :filter_by_length)
     return length_filter(args...)
 end
 
+"""
+    concat_fastas(filepaths::Array{String, 1}, outfile::String)
+
+Write contents of all given files to a single .fasta file.
+"""
 function concat_fastas(filepaths::Array{String, 1}, outfile::String)
     if length(outfile) < 7 || outfile[end-5:end] != ".fasta"
         error("Outfile must end in .fasta")
@@ -201,11 +295,22 @@ end
 
 #------Frequency Fxns------
 
+"""
+    maxfreq(vec)
+
+Return the frequency of the most common element in `vec`.
+"""
 function maxfreq(vec)
     mo = mode(vec)
     proportionmap(vec)[mo]
 end
 
+"""
+    freq(vec, elem)
+
+Return the frequency of given element in given array; 
+if the element is not present, return 0.0.
+"""
 function freq(vec, elem)
     map = proportionmap(vec)
     if haskey(map, elem)
@@ -214,12 +319,24 @@ function freq(vec, elem)
     end
 end
 
+"""
+    sorted_freqs(vec)
+
+Return tuples of (freq, elem) of unique elements of `vec` 
+in order of decreasing frequency.
+"""
 function sorted_freqs(vec)
     propDict = proportionmap(vec)
     seqkeys = keys(propDict)
     return reverse(sort([(propDict[k],k) for k in seqkeys]))
 end
 
+"""
+    freq_dict_print(dictin; thresh=0)
+
+Prints frequency:element of elements of `dictin` above given threshold, 
+where `dictin` is a proportionmap of elements (see `proportionmap` in StatsBase).
+"""
 function freq_dict_print(dictin; thresh=0)
     for i in keys(dictin)
         if dictin[i]>thresh
@@ -228,11 +345,16 @@ function freq_dict_print(dictin; thresh=0)
     end
 end
 
-"""log(x) + log(1 + exp(log(y) - log(x))) for x > y"""
+"""
+    logsum(lga, lgb)
+
+Compute numerically stable logsum. Returns `-Inf` if either input is `-Inf`.
+"""
 function logsum(lga, lgb)
     if lga == lgb == -Inf
         return -Inf
     end
+    # log(x) + log(1 + exp(log(y) - log(x))) for x > y
     return lga > lgb ? (lga + log(1 + exp(lgb - lga))) : (lgb + log(1 + exp(lga - lgb)))
 end
 

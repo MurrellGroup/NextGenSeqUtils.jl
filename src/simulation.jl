@@ -1,4 +1,4 @@
-"""Sequence simulation functions"""
+## Sequence simulation functions
 
 #-------Simple simulations-------#
 
@@ -11,7 +11,11 @@ const SIMPLE_ERRORS = vcat(NUCALPH, NUCALPH, NUCALPH, NUCALPH,
                             for i in 1:16],
                            ["" for i in 1:16])
 
-"""Flip a biased coin."""
+"""
+    flip(p, t, f)
+
+Flip a biased coin.
+"""
 function flip(p, t, f)
     if rand() > p
         return t
@@ -19,19 +23,30 @@ function flip(p, t, f)
     end
 end
 
-"""Generates a random uniform sequence."""
+"""
+    simple_gen_seq(n::Int)
+
+Generates a random uniform sequence of nucleotides.
+"""
 function simple_gen_seq(n::Int)
     return(join(sample(NUCALPH, n)))
 end
 
-"""Evolves a sequence, uniformly."""
+"""
+    simple_evolve(refseq, err_rate)
+
+Evolves a sequence, uniformly.
+"""
 function simple_evolve(refseq, err_rate)
     return join([flip(err_rate, refseq[i], sample(SIMPLE_ERRORS, 1)[1])
                  for i in 1:length(refseq)])
 end
 
-"""Creates a fixed number of mutations"""
+"""
+    fixed_diff_evolve(template::String, n_diffs::Int64)
 
+Creates a fixed number of mutations of a sequence.
+"""
 function fixed_diff_evolve(template::String, n_diffs::Int64)
     diff_pos = sample(1:length(template), n_diffs, replace=false)
     char_arr = collect(template)
@@ -44,21 +59,37 @@ end
 
 #-------Functions for simulating amplicon sequences with a PacBio error model--------
 
-"""run length encoding of a string"""
+"""
+    run_length_encode(x::String)
+
+Run length encoding of a string.
+"""
 run_length_encode(x::String) = StatsBase.rle([c for c in x])
+
+"""
+    run_length_decode(chars, lengths)
+
+Run length decoding of a string.
+"""
 run_length_decode(chars, lengths) = String(StatsBase.inverse_rle(chars, lengths))
 
-"""homopolymer length-to-error-rate scaling.
+"""
+    pb_error_inflation(old_length::Int64)
 
-This function will need to be tweaked to approximate how the error
-rate increases with HP length. A quadratic seems a good first choice.
+Homopolymer length-to-error-rate scaling based on PacBio sequencing.
 
+This function may need to be tweaked to approximate how the error
+rate increases with HP length.
 """
 function pb_error_inflation(old_length::Int64)
     return old_length ^ 1.5
 end
 
-"""Takes a true homopolymer length, and returns an observed homopolymer length"""
+"""
+    length_error_func(old_length::Int64; rate = 0.002)
+
+Takes a true homopolymer length, and returns an observed homopolymer length based on PacBio sequencer error model.
+"""
 function length_error_func(old_length::Int64; rate = 0.002)
     direction = rand() < 0.5
     amount = rand(Poisson(rate * pb_error_inflation(old_length)))
@@ -69,8 +100,10 @@ function length_error_func(old_length::Int64; rate = 0.002)
     end
 end
 
-"""Performs a sequence simulation from a template, specifying a target error rate.
+"""
+    pb_seq_sim(template::String, rate::Float64; with_qvs = false)
 
+Performs a sequence simulation from a template, specifying a target error rate, based on PacBio sequencing error model.
 """
 function pb_seq_sim(template::String, rate::Float64; with_qvs = false)
     mut_prob = rate / 4
@@ -111,13 +144,21 @@ function pb_seq_sim(template::String, rate::Float64; with_qvs = false)
     end
 end
 
-"""Draws from the error rate distribution typically seen in P5 env
-sequence data"""
+"""
+    env_error_rates(n)
+
+Draws from the error rate distribution typically seen in P5 envelope
+sequence data.
+"""
 function env_error_rates(n)
     rand(Gamma(2, 0.0017), n)
 end
 
-"""Simulated PacBio reads from amplicons that have env-like error profiles"""
+"""
+    env_pb_seq_sim(template::String, n::Int64; with_qvs = false)
+
+Simulated PacBio reads from amplicons that have envelope-like error profiles.
+"""
 function env_pb_seq_sim(template::String, n::Int64; with_qvs = false)
     error_rates = env_error_rates(n)
     return [pb_seq_sim(template, err, with_qvs = with_qvs) for err in error_rates]
