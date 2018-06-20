@@ -5,6 +5,9 @@ module NextGenSeqUtils
 
     # align.jl
 
+    usearch_filter,
+    usearch_trim_fastq_with_phreds,
+
     nw_align,
     banded_nw_align,
     triplet_nw_align,
