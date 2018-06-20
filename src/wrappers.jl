@@ -90,6 +90,14 @@ function trim_fastq_entry(trimmed_seq,fastq_read,phred_arr)
     return fastq_read[try_coords[1]:try_coords[2]],phred_arr[try_coords[1]:try_coords[2]]
 end
 
+function array2index_dict(arr)
+    dic = Dict{String,Int64}()
+    for i in 1:length(arr)
+        dic[arr[i]]=i
+    end
+    return dic
+end
+
 function usearch_trim_fastq_with_phreds(inFastqPath, referencePath; divergence=0.9, outFastqPath="")
     #READ IN THE FASTQ FILE
     fastqseqs, fastqphreds, fastqnames = read_fastq(inFastqPath)
