@@ -6,7 +6,7 @@
 # maybe make this look better later to help keep track of names? eg order by file
 
 export
-    usearch_trim_fastq_with_phreds
+    usearch_trim_fastq_with_phreds,
     kmerCount, kmer_count,
     errorProbsToPhreds, error_probs_to_phreds,
     simpleGenSeq, simple_gen_seq,
