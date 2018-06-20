@@ -92,7 +92,7 @@ end
 
 function usearch_trim_fastq_with_phreds(inFastqPath, referencePath; divergence=0.9, outFastqPath="")
     #READ IN THE FASTQ FILE
-    fastqseqs, fastqphreds, fastqnames = NextGenSeqUtils.read_fastq(inFastqPath)
+    fastqseqs, fastqphreds, fastqnames = read_fastq(inFastqPath)
     fastq_name_dic = array2index_dict(fastqnames)
     
     #USEARCH TO TRIM, BUT ONLY STORES .FASTA OUTPUT
