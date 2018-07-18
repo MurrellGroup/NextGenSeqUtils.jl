@@ -5,12 +5,11 @@ Returns aligned strings using the Needleman-Wunch Algorithm (quadratic),
 with end gaps penalized slightly less. edge_reduction is a multiplier (usually
 less than one) on gaps on end of strings.
 """
-function nw_align(s1::String, s2::String; edge_reduction = 0.99)
+function nw_align(s1::String, s2::String; edge_reduction = 0.99, mismatch_cost = -1.0)
     # edge_reduction is a multiplicative score that gets multiplied to
     # the penalties along the edges, to prefer terminal gaps.
     ins_cost = -1.0  # -> : horizontal
     del_cost = -1.0  # V : vertical
-    mismatch_cost = -1.0
     match_cost = 1.0
 
     s1arr = collect(s1)  # vertical
