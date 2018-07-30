@@ -1,7 +1,7 @@
 # Run `julia make.jl` in this folder to generate .html pages in a build/
 # directory, then open index.md for docs
 
-push!(LOAD_PATH,"../src/")
+#push!(LOAD_PATH,"../src/")
 using Documenter, NextGenSeqUtils
 
 makedocs(
@@ -22,5 +22,10 @@ makedocs(
             "utils.md"
         ]
     ]
+)
+
+deploydocs(
+    repo = "github.com/MurrellGroup/NextGenSeqUtils.jl.git",
+    julia = "0.6"
 )
 
