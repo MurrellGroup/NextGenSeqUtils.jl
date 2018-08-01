@@ -6,3 +6,6 @@
 Pages = ["align.md", "hmm.md", "io.md", "kmers.md", "orient.md", "paths.md", "phreds.md", "simulation.md", "utils.md"]
 Depth = 2
 ```
+
+```@index
+```

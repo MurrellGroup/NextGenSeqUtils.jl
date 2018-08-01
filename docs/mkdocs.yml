@@ -1,5 +1,5 @@
 site_name:        NextGenSeqUtils.jl
-repo_url:         https://github.com/MurrrellGroup/NextGenSeqUtils.jl
+repo_url:         https://github.com/MurrellGroup/NextGenSeqUtils
 site_description: A package with utilities for next generation sequencing
 site_author:      Ben Murrell
 
@@ -16,7 +16,6 @@ markdown_extensions:
   - extra
   - tables
   - fenced_code
-  - mdx_math
 
 docs_dir: 'build'
 
@@ -31,4 +30,5 @@ pages:
   - phreds: phreds.md
   - simulation: simulation.md
   - utils: utils.md
+
 
