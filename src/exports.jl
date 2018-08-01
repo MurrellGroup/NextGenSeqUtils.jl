@@ -44,6 +44,7 @@ export
     get_pis,
     get_transition_mat,
     estimate_distance,
+    deMux,
     #meanPairwiseDists, mean_pairwise_dists,
     #fixedDiffEvolve, fixed_diff_evolve,
     #seqSimulate, seq_simulate,
