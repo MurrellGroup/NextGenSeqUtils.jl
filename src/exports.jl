@@ -41,11 +41,15 @@ export
     pbSeqSim, pb_seq_sim,
     envErrorRates, env_error_rates,
     envPBseqSim, env_pb_seq_sim,
+    get_pis,
+    get_transition_mat,
+    estimate_distance,
     #meanPairwiseDists, mean_pairwise_dists,
     #fixedDiffEvolve, fixed_diff_evolve,
     #seqSimulate, seq_simulate,
     #defaultDistMat, default_dist_matrix,
     #SMD_MF, smd_mf,
+    
 
     coords,
     freq,

@@ -8,6 +8,7 @@ using Distributions
 using StatsBase
 using Distances
 using MultivariateStats
+using NextGenSeqUtils
 
 include("phreds.jl")
 include("utils.jl")
@@ -21,3 +22,5 @@ include("paths.jl")
 include("wrappers.jl")
 include("aliases.jl")
 include("demux.jl")
+include("FAD.jl")
+include("evodist.jl")
