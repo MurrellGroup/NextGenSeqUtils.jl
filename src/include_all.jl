@@ -8,7 +8,8 @@ using Distributions
 using StatsBase
 using Distances
 using MultivariateStats
-using NextGenSeqUtils
+#using NextGenSeqUtils
+using PyPlot
 
 include("phreds.jl")
 include("utils.jl")
