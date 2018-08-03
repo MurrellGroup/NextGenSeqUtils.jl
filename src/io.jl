@@ -93,13 +93,22 @@ end
 
 Read .fastq file contents, parse, and return sequences as `seqtype` type, phreds, and names.
 """
-function read_fastq(filename; seqtype=String)
+function read_fastq(filename; seqtype=String, min_length=nothing, max_length=nothing, err_rate=nothing)
     records = read_fastq_records(filename)
     seqs = seqtype[]
     phreds = Vector{Phred}[]
     names = String[]
     for record in records
-        push!(seqs, FASTQ.sequence(seqtype, record))
+		if err_rate != nothing && mean(phred_to_p(Array{Int8,1}(FASTQ.quality(record, :sanger)))) > err_rate
+			continue
+		end	
+		if min_length != nothing && length(FASTQ.sequence(seqtype, record)) < min_length
+			continue
+		end	
+		if max_length != nothing && length(FASTQ.sequence(seqtype, record)) > max_length
+			continue
+        end
+		push!(seqs, FASTQ.sequence(seqtype, record))
         push!(phreds, FASTQ.quality(record, :sanger))
         push!(names, FASTQ.identifier(record))
     end
