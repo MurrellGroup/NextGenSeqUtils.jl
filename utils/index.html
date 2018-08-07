@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Ben Murrell">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>utils - NextGenSeqUtils.jl</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../assets/Documenter.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "utils";
+    var mkdocs_page_input_path = "utils.md";
+    var mkdocs_page_url = "/utils/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> NextGenSeqUtils.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../align/">Align</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../hmm/">hmm</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../io/">io</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../kmers/">kmers</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../orient/">orient</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../paths/">paths</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../phreds/">phreds</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../simulation/">simulation</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">utils</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#utility-and-misc-functions">Utility and Misc. Functions</a></li>
+    
+
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">NextGenSeqUtils.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>utils</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/MurrellGroup/NextGenSeqUtils.jl/edit/master/docs/utils.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Utility-and-Misc.-Functions-1'></a></p>
+<h1 id="utility-and-misc-functions">Utility and Misc. Functions</h1>
+<ul>
+<li><a href="./#BioSequences.reverse_complement"><code>BioSequences.reverse_complement</code></a></li>
+<li><a href="./#NextGenSeqUtils.concat_fastas"><code>NextGenSeqUtils.concat_fastas</code></a></li>
+<li><a href="./#NextGenSeqUtils.dash_count"><code>NextGenSeqUtils.dash_count</code></a></li>
+<li><a href="./#NextGenSeqUtils.degap"><code>NextGenSeqUtils.degap</code></a></li>
+<li><a href="./#NextGenSeqUtils.filter_by_length"><code>NextGenSeqUtils.filter_by_length</code></a></li>
+<li><a href="./#NextGenSeqUtils.freq"><code>NextGenSeqUtils.freq</code></a></li>
+<li><a href="./#NextGenSeqUtils.freq_dict_print"><code>NextGenSeqUtils.freq_dict_print</code></a></li>
+<li><a href="./#NextGenSeqUtils.generate_aa_seqs"><code>NextGenSeqUtils.generate_aa_seqs</code></a></li>
+<li><a href="./#NextGenSeqUtils.length_filter"><code>NextGenSeqUtils.length_filter</code></a></li>
+<li><a href="./#NextGenSeqUtils.maxfreq"><code>NextGenSeqUtils.maxfreq</code></a></li>
+<li><a href="./#NextGenSeqUtils.print_diffs"><code>NextGenSeqUtils.print_diffs</code></a></li>
+<li><a href="./#NextGenSeqUtils.print_fasta"><code>NextGenSeqUtils.print_fasta</code></a></li>
+<li><a href="./#NextGenSeqUtils.print_rgb"><code>NextGenSeqUtils.print_rgb</code></a></li>
+<li><a href="./#NextGenSeqUtils.seq_details"><code>NextGenSeqUtils.seq_details</code></a></li>
+<li><a href="./#NextGenSeqUtils.single_gap"><code>NextGenSeqUtils.single_gap</code></a></li>
+<li><a href="./#NextGenSeqUtils.single_mod_three_gap"><code>NextGenSeqUtils.single_mod_three_gap</code></a></li>
+<li><a href="./#NextGenSeqUtils.sorted_freqs"><code>NextGenSeqUtils.sorted_freqs</code></a></li>
+<li><a href="./#NextGenSeqUtils.translate_to_aa"><code>NextGenSeqUtils.translate_to_aa</code></a></li>
+<li><a href="./#NextGenSeqUtils.trim_ends_indices"><code>NextGenSeqUtils.trim_ends_indices</code></a></li>
+</ul>
+<p><a id='NextGenSeqUtils.print_fasta' href='#NextGenSeqUtils.print_fasta'>#</a>
+<strong><code>NextGenSeqUtils.print_fasta</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>print_fasta(seqs, names)
+</code></pre>
+
+<p>Prints fasta format to the terminal, for copypasting into alignment/blast etc.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L39-L43' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.degap' href='#NextGenSeqUtils.degap'>#</a>
+<strong><code>NextGenSeqUtils.degap</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>degap(s::String)
+</code></pre>
+
+<p>Returns given string without '-' gap symbols.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L51-L55' class='documenter-source'>source</a><br></p>
+<pre><code>degap(s::DNASequence)
+</code></pre>
+
+<p>Returns given string without '-' gap symbols.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L60-L64' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.dash_count' href='#NextGenSeqUtils.dash_count'>#</a>
+<strong><code>NextGenSeqUtils.dash_count</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>dash_count(inStr::String)
+</code></pre>
+
+<p>Counts number of gap symbols '-' in given string.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L69-L73' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.single_gap' href='#NextGenSeqUtils.single_gap'>#</a>
+<strong><code>NextGenSeqUtils.single_gap</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>single_gap(str::String, ind::Int)
+</code></pre>
+
+<p>True if <code>str</code> has a single gap '-' at index <code>ind</code>, else false.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L78-L82' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.single_mod_three_gap' href='#NextGenSeqUtils.single_mod_three_gap'>#</a>
+<strong><code>NextGenSeqUtils.single_mod_three_gap</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>single_mod_three_gap(str::String, ind::Int)
+</code></pre>
+
+<p>True if <code>str</code> has a gap length of 1 mod 3 at given index.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L87-L91' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.seq_details' href='#NextGenSeqUtils.seq_details'>#</a>
+<strong><code>NextGenSeqUtils.seq_details</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>seq_details(fasta_path)
+</code></pre>
+
+<p>Gives names, sequences, error rates, and lengths from given filepath, which may end in '.fasta' or '.fastq'.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L121-L125' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.print_rgb' href='#NextGenSeqUtils.print_rgb'>#</a>
+<strong><code>NextGenSeqUtils.print_rgb</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>print_rgb(r, g, b, t)
+</code></pre>
+
+<p>Prints in colors <code>r</code>,<code>g</code>,<code>b</code> to terminal.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L138-L142' class='documenter-source'>source</a><br></p>
+<p><a id='BioSequences.reverse_complement' href='#BioSequences.reverse_complement'>#</a>
+<strong><code>BioSequences.reverse_complement</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>reverse_complement(seq)
+</code></pre>
+
+<p>Make a reversed complement sequence of <code>seq</code>.</p>
+<p>Ambiguous nucleotides are left as-is.</p>
+<p><a target='_blank' href='https://github.com/BioJulia/BioSequences.jl/blob/35c6414ac7792c40d6886927900ce9cbbf7dbb1b/src/bioseq/transformations.jl#L319-L325' class='documenter-source'>source</a><br></p>
+<pre><code>reverse_complement(kmer::Kmer)
+</code></pre>
+
+<p>Return the reverse complement of <code>kmer</code></p>
+<p><a target='_blank' href='https://github.com/BioJulia/BioSequences.jl/blob/35c6414ac7792c40d6886927900ce9cbbf7dbb1b/src/kmer.jl#L178-L182' class='documenter-source'>source</a><br></p>
+<pre><code>reverse_complement(dna_string::String)
+</code></pre>
+
+<p>Returns the complement of the reverse of given nucleotide sequence.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L147-L151' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.print_diffs' href='#NextGenSeqUtils.print_diffs'>#</a>
+<strong><code>NextGenSeqUtils.print_diffs</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>print_diffs(s1, s2; width=5, prefix=&quot;&quot;)
+</code></pre>
+
+<p>Prints two already aligned sequences with differences in color to terminal.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L156-L160' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.trim_ends_indices' href='#NextGenSeqUtils.trim_ends_indices'>#</a>
+<strong><code>NextGenSeqUtils.trim_ends_indices</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>trim_ends_indices(seq, ref; edge_reduction=0.1)
+</code></pre>
+
+<p>Align <code>seq</code> to <code>ref</code> with default low penalties for gaps on ends,  and trim insertions on the ends of <code>seq</code>.  Returns (start, stop) indices.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L182-L188' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.translate_to_aa' href='#NextGenSeqUtils.translate_to_aa'>#</a>
+<strong><code>NextGenSeqUtils.translate_to_aa</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>translate_to_aa(s::String)
+</code></pre>
+
+<p>Return amino acid string translation of nucleotide sequence using BioSequences conversion.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L206-L210' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.generate_aa_seqs' href='#NextGenSeqUtils.generate_aa_seqs'>#</a>
+<strong><code>NextGenSeqUtils.generate_aa_seqs</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>generate_aa_seqs(str::String)
+</code></pre>
+
+<p>Return sequence translated to amino acids in each reading frame (returns three amino acid sequences).</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L216-L220' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.filter_by_length' href='#NextGenSeqUtils.filter_by_length'>#</a>
+<strong><code>NextGenSeqUtils.filter_by_length</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>filter_by_length(args...)
+</code></pre>
+
+<p>Deprecated. See <code>length_filter</code>.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L265-L269' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.length_filter' href='#NextGenSeqUtils.length_filter'>#</a>
+<strong><code>NextGenSeqUtils.length_filter</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void},
+              minlength::Int, maxlength::Int)
+</code></pre>
+
+<p>Filter sequences and corresponding names and phreds (which may be <code>nothing</code>) by length.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L240-L245' class='documenter-source'>source</a><br></p>
+<pre><code>length_filter(seqs::Array{String, 1}, minlength::Int64, maxlength::Int64)
+</code></pre>
+
+<p>Filter sequences by length.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L255-L259' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.concat_fastas' href='#NextGenSeqUtils.concat_fastas'>#</a>
+<strong><code>NextGenSeqUtils.concat_fastas</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>concat_fastas(filepaths::Array{String, 1}, outfile::String)
+</code></pre>
+
+<p>Write contents of all given files to a single .fasta file.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L275-L279' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.maxfreq' href='#NextGenSeqUtils.maxfreq'>#</a>
+<strong><code>NextGenSeqUtils.maxfreq</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>maxfreq(vec)
+</code></pre>
+
+<p>Return the frequency of the most common element in <code>vec</code>.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L298-L302' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.freq' href='#NextGenSeqUtils.freq'>#</a>
+<strong><code>NextGenSeqUtils.freq</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>freq(vec, elem)
+</code></pre>
+
+<p>Return the frequency of given element in given array;  if the element is not present, return 0.0.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L308-L313' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.sorted_freqs' href='#NextGenSeqUtils.sorted_freqs'>#</a>
+<strong><code>NextGenSeqUtils.sorted_freqs</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>sorted_freqs(vec)
+</code></pre>
+
+<p>Return tuples of (freq, elem) of unique elements of <code>vec</code>  in order of decreasing frequency.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L322-L327' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.freq_dict_print' href='#NextGenSeqUtils.freq_dict_print'>#</a>
+<strong><code>NextGenSeqUtils.freq_dict_print</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>freq_dict_print(dictin; thresh=0)
+</code></pre>
+
+<p>Prints frequency:element of elements of <code>dictin</code> above given threshold,  where <code>dictin</code> is a proportionmap of elements (see <code>proportionmap</code> in StatsBase).</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L334-L339' class='documenter-source'>source</a><br></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../simulation/" class="btn btn-neutral" title="simulation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/MurrellGroup/NextGenSeqUtils.jl/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../simulation/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+      <script src="../assets/mathjaxhelper.js"></script>
+      <script src="../search/require.js"></script>
+      <script src="../search/search.js"></script>
+
+</body>
+</html>

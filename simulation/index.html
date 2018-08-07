@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Ben Murrell">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>simulation - NextGenSeqUtils.jl</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../assets/Documenter.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "simulation";
+    var mkdocs_page_input_path = "simulation.md";
+    var mkdocs_page_url = "/simulation/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> NextGenSeqUtils.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../align/">Align</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../hmm/">hmm</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../io/">io</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../kmers/">kmers</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../orient/">orient</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../paths/">paths</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../phreds/">phreds</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">simulation</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#sequencer-simulation-functions">Sequencer Simulation Functions</a></li>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../utils/">utils</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">NextGenSeqUtils.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>simulation</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/MurrellGroup/NextGenSeqUtils.jl/edit/master/docs/simulation.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Sequencer-Simulation-Functions-1'></a></p>
+<h1 id="sequencer-simulation-functions">Sequencer Simulation Functions</h1>
+<ul>
+<li><a href="./#NextGenSeqUtils.env_pb_seq_sim"><code>NextGenSeqUtils.env_pb_seq_sim</code></a></li>
+<li><a href="./#NextGenSeqUtils.fixed_diff_evolve"><code>NextGenSeqUtils.fixed_diff_evolve</code></a></li>
+<li><a href="./#NextGenSeqUtils.pb_seq_sim"><code>NextGenSeqUtils.pb_seq_sim</code></a></li>
+<li><a href="./#NextGenSeqUtils.simple_evolve"><code>NextGenSeqUtils.simple_evolve</code></a></li>
+<li><a href="./#NextGenSeqUtils.simple_gen_seq"><code>NextGenSeqUtils.simple_gen_seq</code></a></li>
+</ul>
+<p><a id='NextGenSeqUtils.simple_gen_seq' href='#NextGenSeqUtils.simple_gen_seq'>#</a>
+<strong><code>NextGenSeqUtils.simple_gen_seq</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>simple_gen_seq(n::Int)
+</code></pre>
+
+<p>Generates a random uniform sequence of nucleotides.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/simulation.jl#L26-L30' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.simple_evolve' href='#NextGenSeqUtils.simple_evolve'>#</a>
+<strong><code>NextGenSeqUtils.simple_evolve</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>simple_evolve(refseq, err_rate)
+</code></pre>
+
+<p>Evolves a sequence, uniformly.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/simulation.jl#L35-L39' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.fixed_diff_evolve' href='#NextGenSeqUtils.fixed_diff_evolve'>#</a>
+<strong><code>NextGenSeqUtils.fixed_diff_evolve</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>fixed_diff_evolve(template::String, n_diffs::Int64)
+</code></pre>
+
+<p>Creates a fixed number of mutations of a sequence.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/simulation.jl#L45-L49' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.pb_seq_sim' href='#NextGenSeqUtils.pb_seq_sim'>#</a>
+<strong><code>NextGenSeqUtils.pb_seq_sim</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>pb_seq_sim(template::String, rate::Float64; with_qvs = false)
+</code></pre>
+
+<p>Performs a sequence simulation from a template, specifying a target error rate, based on PacBio sequencing error model.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/simulation.jl#L103-L107' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.env_pb_seq_sim' href='#NextGenSeqUtils.env_pb_seq_sim'>#</a>
+<strong><code>NextGenSeqUtils.env_pb_seq_sim</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>env_pb_seq_sim(template::String, n::Int64; with_qvs = false)
+</code></pre>
+
+<p>Simulated PacBio reads from amplicons that have envelope-like error profiles.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/simulation.jl#L157-L161' class='documenter-source'>source</a><br></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../utils/" class="btn btn-neutral float-right" title="utils">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../phreds/" class="btn btn-neutral" title="phreds"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/MurrellGroup/NextGenSeqUtils.jl/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../phreds/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../utils/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+      <script src="../assets/mathjaxhelper.js"></script>
+      <script src="../search/require.js"></script>
+      <script src="../search/search.js"></script>
+
+</body>
+</html>

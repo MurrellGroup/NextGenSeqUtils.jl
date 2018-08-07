@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Ben Murrell">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>hmm - NextGenSeqUtils.jl</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../assets/Documenter.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "hmm";
+    var mkdocs_page_input_path = "hmm.md";
+    var mkdocs_page_url = "/hmm/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> NextGenSeqUtils.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../align/">Align</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">hmm</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#hidden-markov-model-functions">Hidden Markov Model Functions</a></li>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../io/">io</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../kmers/">kmers</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../orient/">orient</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../paths/">paths</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../phreds/">phreds</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../simulation/">simulation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../utils/">utils</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">NextGenSeqUtils.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>hmm</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/MurrellGroup/NextGenSeqUtils.jl/edit/master/docs/hmm.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Hidden-Markov-Model-Functions-1'></a></p>
+<h1 id="hidden-markov-model-functions">Hidden Markov Model Functions</h1>
+<ul>
+<li><a href="./#NextGenSeqUtils.backward_logs"><code>NextGenSeqUtils.backward_logs</code></a></li>
+<li><a href="./#NextGenSeqUtils.forward_backward_logs"><code>NextGenSeqUtils.forward_backward_logs</code></a></li>
+<li><a href="./#NextGenSeqUtils.forward_logs"><code>NextGenSeqUtils.forward_logs</code></a></li>
+<li><a href="./#NextGenSeqUtils.gen_seq_with_model"><code>NextGenSeqUtils.gen_seq_with_model</code></a></li>
+<li><a href="./#NextGenSeqUtils.get_obs_given_state"><code>NextGenSeqUtils.get_obs_given_state</code></a></li>
+<li><a href="./#NextGenSeqUtils.homopolymer_filter"><code>NextGenSeqUtils.homopolymer_filter</code></a></li>
+<li><a href="./#NextGenSeqUtils.initial_dist"><code>NextGenSeqUtils.initial_dist</code></a></li>
+<li><a href="./#NextGenSeqUtils.logsum"><code>NextGenSeqUtils.logsum</code></a></li>
+<li><a href="./#NextGenSeqUtils.markov_filter"><code>NextGenSeqUtils.markov_filter</code></a></li>
+<li><a href="./#NextGenSeqUtils.obs_mat"><code>NextGenSeqUtils.obs_mat</code></a></li>
+<li><a href="./#NextGenSeqUtils.trans_mat"><code>NextGenSeqUtils.trans_mat</code></a></li>
+<li><a href="./#NextGenSeqUtils.viterbi_logs"><code>NextGenSeqUtils.viterbi_logs</code></a></li>
+<li><a href="./#NextGenSeqUtils.viterbiprint"><code>NextGenSeqUtils.viterbiprint</code></a></li>
+</ul>
+<p><a id='NextGenSeqUtils.viterbi_logs' href='#NextGenSeqUtils.viterbi_logs'>#</a>
+<strong><code>NextGenSeqUtils.viterbi_logs</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>viterbi_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
+</code></pre>
+
+<p>Return viterbi path and log probability for that path. Takes logs of matrices. <code>observations_given_states</code> has # rows = # states, # columns = # steps of markov process.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L11-L16' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.trans_mat' href='#NextGenSeqUtils.trans_mat'>#</a>
+<strong><code>NextGenSeqUtils.trans_mat</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>trans_mat(; uniform_cycle_prob = 0.9999999999, homopoly_cycle_prob = 0.98)
+</code></pre>
+
+<p>Return 5x5 transition matrix with given transition probabilities State 1 – uniform observation distribution. State 2 – High "A" observation likelihood. State 3 – High "C" observation likelihood. State 4 – High "G" observation likelihood. State 5 – High "T" observation likelihood. Each state has high likelihood to return to state 1. States 2 through 5 represent high likelihood of homopolymer regions of respective nuc.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L42-L52' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.obs_mat' href='#NextGenSeqUtils.obs_mat'>#</a>
+<strong><code>NextGenSeqUtils.obs_mat</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>obs_mat(; homopoly_prob = 0.99)
+</code></pre>
+
+<p>Return 5x4 observation matrix with given probabilities. State 1 – uniform observation distribution. State 2 – High "A" observation likelihood. State 3 – High "C" observation likelihood. State 4 – High "G" observation likelihood. State 5 – High "T" observation likelihood. Columns are in same order as columns 2 through 5 (the last four rows give a symmetric matrix).</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L70-L81' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.initial_dist' href='#NextGenSeqUtils.initial_dist'>#</a>
+<strong><code>NextGenSeqUtils.initial_dist</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>initial_dist(; uniform_state = 0.99)
+</code></pre>
+
+<p>Initial state distributions: see <code>trans_mat</code> for state descriptions. 5x1 vector.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L99-L103' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.get_obs_given_state' href='#NextGenSeqUtils.get_obs_given_state'>#</a>
+<strong><code>NextGenSeqUtils.get_obs_given_state</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>get_obs_given_state(observation_matrix::Array{Float64,2}, observation_seq::String)
+</code></pre>
+
+<p>Populate 5xT matrix with likelihood of observation at each of T time steps given each  nucleotide in <code>observation_seq</code>.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L109-L114' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.homopolymer_filter' href='#NextGenSeqUtils.homopolymer_filter'>#</a>
+<strong><code>NextGenSeqUtils.homopolymer_filter</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>homopolymer_filter(seqs::Array{String,1}, phreds, names;
+                   transmat = nothing, obsmat = nothing,
+                   initialdist = nothing)
+</code></pre>
+
+<p>Filter sequences with "bad" sections in the middle – abnormally long runs of a single base, using viterbi alg inference. If this homopolymer occurs on one end of a sequence, keeps sequence and trims homopolymer region off end. <code>phreds</code> and/or <code>names</code> may be <code>nothing</code>, in which case <code>nothing</code> is returned for the respective field. If transition, observation, initial distribution matrices not provided (default) then the default values from the respective constructors are used.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L126-L136' class='documenter-source'>source</a><br></p>
+<pre><code>homopolymer_filter(sourcepath::String, destpath::String;
+                   transmat = nothing, obsmat = nothing,
+                   initialdist = nothing, format=&quot;fastq&quot;)
+</code></pre>
+
+<p>Filter sequences with "bad" sections in the middle – abnormally long runs of a single base, using viterbi alg inference. If this homopolymer occurs on one end of a sequence, keeps sequence and trims homopolymer region off end. Takes a file path for each of a source file of type <code>format</code> (which may be "fasta" or "fastq") and a destination file is written which is the same file type.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L191-L200' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.markov_filter' href='#NextGenSeqUtils.markov_filter'>#</a>
+<strong><code>NextGenSeqUtils.markov_filter</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>homopolymer_filter(seqs::Array{String,1}, phreds, names;
+                   transmat = nothing, obsmat = nothing,
+                   initialdist = nothing)
+</code></pre>
+
+<p>Filter sequences with "bad" sections in the middle – abnormally long runs of a single base, using viterbi alg inference. If this homopolymer occurs on one end of a sequence, keeps sequence and trims homopolymer region off end. <code>phreds</code> and/or <code>names</code> may be <code>nothing</code>, in which case <code>nothing</code> is returned for the respective field. If transition, observation, initial distribution matrices not provided (default) then the default values from the respective constructors are used.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L126-L136' class='documenter-source'>source</a><br></p>
+<pre><code>homopolymer_filter(sourcepath::String, destpath::String;
+                   transmat = nothing, obsmat = nothing,
+                   initialdist = nothing, format=&quot;fastq&quot;)
+</code></pre>
+
+<p>Filter sequences with "bad" sections in the middle – abnormally long runs of a single base, using viterbi alg inference. If this homopolymer occurs on one end of a sequence, keeps sequence and trims homopolymer region off end. Takes a file path for each of a source file of type <code>format</code> (which may be "fasta" or "fastq") and a destination file is written which is the same file type.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L191-L200' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.forward_logs' href='#NextGenSeqUtils.forward_logs'>#</a>
+<strong><code>NextGenSeqUtils.forward_logs</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>forward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
+</code></pre>
+
+<p>Compute logs of forward scores. Takes logs of matrices as inputs. <code>observations_given_states</code> has # rows = # states, # columns = # steps of markov process.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L224-L229' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.backward_logs' href='#NextGenSeqUtils.backward_logs'>#</a>
+<strong><code>NextGenSeqUtils.backward_logs</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>backward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
+</code></pre>
+
+<p>Compute logs of backward scores and individual posterior probabilities. Takes logs of matrices as inputs. <code>observations_given_states</code> has # rows = # states, # columns = # steps of markov process.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L244-L249' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.forward_backward_logs' href='#NextGenSeqUtils.forward_backward_logs'>#</a>
+<strong><code>NextGenSeqUtils.forward_backward_logs</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>forward_backward_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
+</code></pre>
+
+<p>Compute logs of forward-backward scores and individual probabilities. Takes logs of matrices as inputs. <code>observations_given_states</code> has # rows = # states, # columns = # steps of markov process.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L264-L269' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.logsum' href='#NextGenSeqUtils.logsum'>#</a>
+<strong><code>NextGenSeqUtils.logsum</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>logsum(lga, lgb)
+</code></pre>
+
+<p>Compute numerically stable logsum. Returns <code>-Inf</code> if either input is <code>-Inf</code>.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/utils.jl#L348-L352' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.gen_seq_with_model' href='#NextGenSeqUtils.gen_seq_with_model'>#</a>
+<strong><code>NextGenSeqUtils.gen_seq_with_model</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>gen_seq_with_model(n::Int, trans_mat, obs_mat, initial_dists)
+</code></pre>
+
+<p>Generate a sequence given a markov model. May create bad reads (long runs of a single base).</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L294-L298' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.viterbiprint' href='#NextGenSeqUtils.viterbiprint'>#</a>
+<strong><code>NextGenSeqUtils.viterbiprint</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>viterbiprint(s::String)
+</code></pre>
+
+<p>Draw flagged sites with capital letters, safe sites with lowercase.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/hmm.jl#L310-L314' class='documenter-source'>source</a><br></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../io/" class="btn btn-neutral float-right" title="io">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../align/" class="btn btn-neutral" title="Align"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/MurrellGroup/NextGenSeqUtils.jl/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../align/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../io/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+      <script src="../assets/mathjaxhelper.js"></script>
+      <script src="../search/require.js"></script>
+      <script src="../search/search.js"></script>
+
+</body>
+</html>

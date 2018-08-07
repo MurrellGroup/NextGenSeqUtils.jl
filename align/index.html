@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Ben Murrell">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Align - NextGenSeqUtils.jl</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../assets/Documenter.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Align";
+    var mkdocs_page_input_path = "align.md";
+    var mkdocs_page_url = "/align/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> NextGenSeqUtils.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Align</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#alignment-functions">Alignment Functions</a></li>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../hmm/">hmm</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../io/">io</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../kmers/">kmers</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../orient/">orient</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../paths/">paths</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../phreds/">phreds</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../simulation/">simulation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../utils/">utils</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">NextGenSeqUtils.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Align</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/MurrellGroup/NextGenSeqUtils.jl/edit/master/docs/align.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Alignment-Functions-1'></a></p>
+<h1 id="alignment-functions">Alignment Functions</h1>
+<ul>
+<li><a href="./#NextGenSeqUtils.align_reference_frames"><code>NextGenSeqUtils.align_reference_frames</code></a></li>
+<li><a href="./#NextGenSeqUtils.banded_nw_align"><code>NextGenSeqUtils.banded_nw_align</code></a></li>
+<li><a href="./#NextGenSeqUtils.kmer_seeded_align"><code>NextGenSeqUtils.kmer_seeded_align</code></a></li>
+<li><a href="./#NextGenSeqUtils.kmer_seeded_edit_dist"><code>NextGenSeqUtils.kmer_seeded_edit_dist</code></a></li>
+<li><a href="./#NextGenSeqUtils.loc_kmer_seeded_align"><code>NextGenSeqUtils.loc_kmer_seeded_align</code></a></li>
+<li><a href="./#NextGenSeqUtils.local_align"><code>NextGenSeqUtils.local_align</code></a></li>
+<li><a href="./#NextGenSeqUtils.local_edit_dist"><code>NextGenSeqUtils.local_edit_dist</code></a></li>
+<li><a href="./#NextGenSeqUtils.local_kmer_seeded_align"><code>NextGenSeqUtils.local_kmer_seeded_align</code></a></li>
+<li><a href="./#NextGenSeqUtils.nw_align"><code>NextGenSeqUtils.nw_align</code></a></li>
+<li><a href="./#NextGenSeqUtils.resolve_alignments"><code>NextGenSeqUtils.resolve_alignments</code></a></li>
+<li><a href="./#NextGenSeqUtils.triplet_kmer_seeded_align"><code>NextGenSeqUtils.triplet_kmer_seeded_align</code></a></li>
+<li><a href="./#NextGenSeqUtils.triplet_nw_align"><code>NextGenSeqUtils.triplet_nw_align</code></a></li>
+</ul>
+<p><a id='NextGenSeqUtils.nw_align' href='#NextGenSeqUtils.nw_align'>#</a>
+<strong><code>NextGenSeqUtils.nw_align</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>nw_align(s1::String, s2::String; edge_reduction = 0.99)
+</code></pre>
+
+<p>Returns aligned strings using the Needleman-Wunch Algorithm (quadratic),  with end gaps penalized slightly less. edge_reduction is a multiplier (usually less than one) on gaps on end of strings.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L1-L7' class='documenter-source'>source</a><br></p>
+<pre><code>nw_align(s1::String, s2::String, banded::Float64)
+</code></pre>
+
+<p>Wrapper for <code>nw_align</code> and <code>banded_nw_align</code>. A larger <code>banded</code> value makes alignment slower but more accurate.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L108-L113' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.banded_nw_align' href='#NextGenSeqUtils.banded_nw_align'>#</a>
+<strong><code>NextGenSeqUtils.banded_nw_align</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coeff = 1)
+</code></pre>
+
+<p>Like nw_align, but sub quadratic by only computing values within a band around the center diagonal. One 'band' of radius 3 = (4,1), (3,1), (2,1), (1,1), (1,2), (1,3), (1,4), aka upside-down L shape. band_coeff = 1 is sufficient to get same alignments as nw_align for 10% diverged sequences ~97% of the time; increase this value for more conservative alignment with longer computation time. Radius of band = <code>bandwidth</code> = <code>band_coeff</code> * sqrt(avg seq length)</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L147-L155' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.triplet_nw_align' href='#NextGenSeqUtils.triplet_nw_align'>#</a>
+<strong><code>NextGenSeqUtils.triplet_nw_align</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundary_mult = 2)
+</code></pre>
+
+<p>Returns alignment of two sequences where <code>s1</code> is a reference with reading frame to be preserved and <code>s2</code> is a query sequence. <code>boundary_mult</code> adjusts penalties for gaps preserving the reading frame of <code>s1</code>. This usually works best on range 0 to 3, higher values for more strongly enforced gaps aligned on  reference frame (divisible-by-3 indices)</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L276-L283' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.local_align' href='#NextGenSeqUtils.local_align'>#</a>
+<strong><code>NextGenSeqUtils.local_align</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>local_align(ref::String, query::String; mismatch_score = -1, 
+            match_score = 1, gap_penalty = -1, 
+            rightaligned=true, refend = false)
+</code></pre>
+
+<p>Aligns a query sequence locally to a reference. If true, <code>rightaligned</code> keeps the right ends of each sequence in final alignment- otherwise they are trimmed;  <code>refend</code> keeps the beginning/left end of <code>ref</code>.  If you want to keep both ends of both strings, use nw_align. For best alignments use the default score values.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L423-L433' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.kmer_seeded_align' href='#NextGenSeqUtils.kmer_seeded_align'>#</a>
+<strong><code>NextGenSeqUtils.kmer_seeded_align</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>kmer_seeded_align(s1::String, s2::String;
+                  wordlength = 30,
+                  skip = 10,
+                  aligncodons = false,
+                  banded = 1.0,
+                  debug::Bool = false)
+</code></pre>
+
+<p>Returns aligned strings, where alignment is first done with larger word matches and  then (possibly banded) Needleman-Wunsch on intermediate intervals. <code>skip</code> gives a necessary gap between searched-for words in <code>s1</code>. For best results, use the default <code>wordlength</code> and <code>skip</code> values. See <code>nw_align</code> for explanation of <code>banded</code>.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L767-L780' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.triplet_kmer_seeded_align' href='#NextGenSeqUtils.triplet_kmer_seeded_align'>#</a>
+<strong><code>NextGenSeqUtils.triplet_kmer_seeded_align</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>triplet_kmer_seeded_align(s1::String, s2::String;
+                          wordlength = 30,
+                          skip = 9,
+                          boundary_mult = 2,
+                          alignedcodons = true,
+                          debug::Bool=false)
+</code></pre>
+
+<p>Returns aligned strings, where alignment is first done with word matches and  then Needleman-Wunsch on intermediate intervals, prefering to preserve the  reading frame of the first arg <code>s1</code>. <code>skip</code> gives a necessary gap between searched-for words in <code>s1</code>. For best results, use the default <code>wordlength</code> and <code>skip</code> values. See <code>triplet_nw_align</code> for explanation of <code>boundary_mult</code>.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L838-L852' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.loc_kmer_seeded_align' href='#NextGenSeqUtils.loc_kmer_seeded_align'>#</a>
+<strong><code>NextGenSeqUtils.loc_kmer_seeded_align</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>function local_kmer_seeded_align(s1::String, s2::String;
+                                 wordlength = 30,
+                                 skip = 10,
+                                 trimpadding = 100,
+                                 debug::Bool=false)
+</code></pre>
+
+<p>Returns locally aligned strings, where alignment is first done with word matches and  then Needleman-Wunsch on intermediate intervals.</p>
+<p><code>s1</code> is a reference to align to, and <code>s2</code> is a query to extract a local match from. <code>s2</code> may be trimmed or expanded with gaps. Before locally aligning ends of sequences, the ends of <code>s2</code> are trimmed to length <code>trimpadding</code> for faster alignment. Increasing this will possible increase alignment accuracy but effect runtime. <code>skip</code> gives a necessary gap between searched-for words in <code>s1</code>. For best results, use the default <code>wordlength</code> and <code>skip</code> values.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L900-L917' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.local_kmer_seeded_align' href='#NextGenSeqUtils.local_kmer_seeded_align'>#</a>
+<strong><code>NextGenSeqUtils.local_kmer_seeded_align</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>function local_kmer_seeded_align(s1::String, s2::String;
+                                 wordlength = 30,
+                                 skip = 10,
+                                 trimpadding = 100,
+                                 debug::Bool=false)
+</code></pre>
+
+<p>Returns locally aligned strings, where alignment is first done with word matches and  then Needleman-Wunsch on intermediate intervals.</p>
+<p><code>s1</code> is a reference to align to, and <code>s2</code> is a query to extract a local match from. <code>s2</code> may be trimmed or expanded with gaps. Before locally aligning ends of sequences, the ends of <code>s2</code> are trimmed to length <code>trimpadding</code> for faster alignment. Increasing this will possible increase alignment accuracy but effect runtime. <code>skip</code> gives a necessary gap between searched-for words in <code>s1</code>. For best results, use the default <code>wordlength</code> and <code>skip</code> values.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L900-L917' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.kmer_seeded_edit_dist' href='#NextGenSeqUtils.kmer_seeded_edit_dist'>#</a>
+<strong><code>NextGenSeqUtils.kmer_seeded_edit_dist</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>kmer_seeded_edit_dist(s1::String , s2::String;
+                      wordlength = 30,
+                      skip = 5,
+                      aa_matches = false)
+</code></pre>
+
+<p>Computes levenshtein edit distance with speedups from only computing the dp scoring matrix between word matches. If aa_matches = true, will attempt to find amino acid matches in any reference frame,  and add the nucleotide Hamming distance of these matches to Levenshtein distances of mismatches. <code>skip</code> gives a necessary gap between searched-for words in <code>s1</code>. For best results, use the default <code>wordlength</code> and <code>skip</code> values.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L987-L998' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.resolve_alignments' href='#NextGenSeqUtils.resolve_alignments'>#</a>
+<strong><code>NextGenSeqUtils.resolve_alignments</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>resolve_alignments(ref::String, query::String; mode = 1)
+</code></pre>
+
+<p>Called on aligned strings. Resolves <code>query</code> with respect to <code>ref</code>.  <code>mode</code> = 1 for resolving single indels, <code>mode</code> = 2 for resolving single indels and codon insertions in query.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L1057-L1062' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.align_reference_frames' href='#NextGenSeqUtils.align_reference_frames'>#</a>
+<strong><code>NextGenSeqUtils.align_reference_frames</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>align_reading_frames(clusters; k = 6, thresh = 0.03, verbose = false)
+</code></pre>
+
+<p>Takes <code>clusters</code> = [consensus_sequences, cluster_sizes], chooses references out of consensuses that do not have stop codons in the middle, and makes all consensus sequence reading frames agree. Returns resolved consensus seqs (<code>goods</code>) along with filtered out consensus seqs that are &gt;<code>thresh</code> divergent from nearest reference (<code>bads</code>). <code>k</code> = kmer size for computing kmer vectors of sequences.</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L1091-L1100' class='documenter-source'>source</a><br></p>
+<p><a id='NextGenSeqUtils.local_edit_dist' href='#NextGenSeqUtils.local_edit_dist'>#</a>
+<strong><code>NextGenSeqUtils.local_edit_dist</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>local_edit_dist(s1::String, s2::String)
+</code></pre>
+
+<p>Returns the edit distance between two sequences after local alignment</p>
+<p><a target='_blank' href='https://github.com/MurrellGroup/NextGenSeqUtils.jl/blob/fdf03a6fa43baf30257d70c58d0c345ad0d25065/src/align.jl#L1155-L1159' class='documenter-source'>source</a><br></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../hmm/" class="btn btn-neutral float-right" title="hmm">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/MurrellGroup/NextGenSeqUtils.jl/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../hmm/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+      <script src="../assets/mathjaxhelper.js"></script>
+      <script src="../search/require.js"></script>
+      <script src="../search/search.js"></script>
+
+</body>
+</html>
