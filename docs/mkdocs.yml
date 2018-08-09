@@ -3,7 +3,7 @@ repo_url:         https://github.com/MurrellGroup/NextGenSeqUtils.jl
 site_description: A package with utilities for next generation sequencing
 site_author:      Ben Murrell
 
-theme: readthedocs
+theme: material
 
 extra_css:
   - assets/Documenter.css

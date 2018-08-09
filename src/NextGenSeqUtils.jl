@@ -109,7 +109,7 @@ module NextGenSeqUtils
     freq_dict_print,
     nl43env
 
-	# demux.jl
-	demux_fastx
+    # demux.jl
+    demux_fastx
 	
 end # module
