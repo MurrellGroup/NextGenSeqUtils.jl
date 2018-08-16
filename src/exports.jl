@@ -52,8 +52,7 @@ export
     #seqSimulate, seq_simulate,
     #defaultDistMat, default_dist_matrix,
     #SMD_MF, smd_mf,
-    
-
+    correct_kmer_dist,
     coords,
     freq,
     fine_cluster_and_consensus,
