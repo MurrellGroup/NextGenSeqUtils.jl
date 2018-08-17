@@ -60,4 +60,7 @@ export
     differ_by_just_one_gap,
     recursive_split,
     read_fasta,
-	demux_fastx
+	demux_fastx,
+    FAD,
+    dist_matrix
+
