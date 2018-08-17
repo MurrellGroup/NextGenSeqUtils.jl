@@ -107,9 +107,20 @@ module NextGenSeqUtils
     freq,
     sorted_freqs,
     freq_dict_print,
-    nl43env
+    nl43env,
+    dist_matrix,
 
     # demux.jl
-    demux_fastx
+    demux_fastx,
+    IUPAC_equals,
+    toIUPACnum,
+
+    #FAD.jl
+    FAD,
+
+    #evodist
+    estimate_distance
+    
 	
 end # module
+
