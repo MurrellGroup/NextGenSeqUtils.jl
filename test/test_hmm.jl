@@ -1,0 +1,15 @@
+@testset "hmm" begin
+    @testset "homopolymer_filter" begin
+        seqs = ["GTCGATCGACTAGCTGCATGACTGACATCGACATCGACGGAGCATGACTAGGACGACGAGCATC",
+                "GTCGATCGACTAGCTGCATGACTGACATCGACATCGACGGAGCATGACTAGGACGACGAGCATC",
+                "GTCGATCGACTAGCTGCATGACTGACATCGACATCGACGGAGCATGACTAGGACGACGAGCATCAAAAAAAAAAAAAAAAAAAAA"]  
+        names = ["s1", "s2", "s3"]
+        phreds = [[UInt8(30) for i in 1:length(seq)] for seq in seqs]
+        newseqs, newphreds, newnames = homopolymer_filter(seqs, phreds, names)
+        
+        @test newseqs == ["GTCGATCGACTAGCTGCATGACTGACATCGACATCGACGGAGCATGACTAGGACGACGAGCATC",
+                         "GTCGATCGACTAGCTGCATGACTGACATCGACATCGACGGAGCATGACTAGGACGACGAGCATC",
+                         "GTCGATCGACTAGCTGCATGACTGACATCGACATCGACGGAGCATGACTAGGACGACGAGCATC"]
+    end
+
+end

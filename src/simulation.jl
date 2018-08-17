@@ -19,7 +19,8 @@ Flip a biased coin.
 function flip(p, t, f)
     if rand() > p
         return t
- else return f
+     else 
+        return f
     end
 end
 

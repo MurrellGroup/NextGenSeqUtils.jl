@@ -52,6 +52,8 @@ module NextGenSeqUtils
     kmer_count,
     sparse_aa_kmer_count,
     corrected_kmer_dist,
+    corrected_kmer_dist_full,
+
 
     # orient.jl
 

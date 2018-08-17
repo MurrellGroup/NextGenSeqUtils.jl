@@ -80,3 +80,9 @@ function corrected_kmer_dist(k::Int)
     end
     return kdist
 end
+"""
+    corrected_kmer_dist_full(kmers1::Array, kmers2::Array; k = 6)
+"""
+function corrected_kmer_dist_full(kmers1::Array, kmers2::Array; k = 6)
+    return sqeuclidean(kmers1, kmers2)/(2*k)
+end
