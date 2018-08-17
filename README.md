@@ -17,3 +17,8 @@ Pkg.clone("https://github.com/MurrellGroup/NextGenSeqUtils.jl.git")
 ```julia
 using NextGenSeqUtils
 ```
+
+## Run Tests
+```julia
+Pkg.test("NextGenSeqUtils")
+```
