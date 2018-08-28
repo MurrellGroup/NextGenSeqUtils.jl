@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/MurrellGroup/NextGenSeqUtils.jl.svg?branch=master)](https://travis-ci.org/MurrellGroup/NextGenSeqUtils.jl)
+[![Build Status](https://travis-ci.com/MurrellGroup/NextGenSeqUtils.jl.svg?branch=master)](https://travis-ci.com/MurrellGroup/NextGenSeqUtils.jl)
 
 # NextGenSeqUtils
 
