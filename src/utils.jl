@@ -238,12 +238,12 @@ function length_filter_inds(seqs::Array{String, 1}, minlength::Int, maxlength::I
 end
 
 """
-    length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void},
+    length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred},1},Nothing}, names::Union{Array{String,1},Nothing},
                   minlength::Int, maxlength::Int)
 
 Filter sequences and corresponding names and phreds (which may be `nothing`) by length.
 """
-function length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred},1},Void}, names::Union{Array{String,1},Void},
+function length_filter(seqs::Array{String, 1}, phreds::Union{Array{Vector{Phred},1},Nothing}, names::Union{Array{String,1},Nothing},
                            minlength::Int, maxlength::Int)
     inds = length_filter_inds(seqs, minlength, maxlength)
     seqs = seqs[inds]
@@ -392,4 +392,5 @@ const nl43env = "GAGCAGAAGACAGTGGCAATGAGAGTGAAGGAGAAGTATCAGCACTTGTGGAGATGGGGGTGG
 "GGGTGGGAAGCCCTCAAATATTGGTGGAATCTCCTACAGTATTGGAGTCAGGAACTAAAGAATAGTGCTGTTAACTT"*
 "GCTCAATGCCACAGCCATAGCAGTAGCTGAGGGGACAGATAGGGTTATAGAAGTATTACAAGCAGCTTATAGAGCTA"*
 "TTCGCCACATACCTAGAAGAATAAGACAGGGCTTGGAAAGGATTTTGCTATAAGATGGGTGGCAAGTGG";
+
 

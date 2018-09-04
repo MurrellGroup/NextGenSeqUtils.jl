@@ -1,7 +1,7 @@
 """
 Datatype for holding usearch and mafft file paths
 """
-type Paths
+mutable struct Paths
     usearch::String
     mafft::String
 end

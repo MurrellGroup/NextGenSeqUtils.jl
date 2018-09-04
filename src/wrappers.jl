@@ -142,12 +142,13 @@ function mafft(inpath, outpath; path="", flags::Vector{String}=String[], kwargs.
     run(`$mafft $flagstrings $args --quiet --adjustdirection --progress /tmp/mafft.progress --out $outpath $inpath`)
 end
 
+
 """
     mafft_consensus{T<:BioSequence}(seqs::Vector{T}; kwargs...)
 
 Julia wrapper for mafft.
 """
-function mafft_consensus{T<:BioSequence}(seqs::Vector{T}; kwargs...)
+function mafft_consensus(seqs::Vector{T},; kwargs...) where T <: BioSequence
     mktempdir() do mydir
         seqfile = string(mydir, "/sequences.fasta")
         mafftout = string(mydir, "/mafft.fasta")

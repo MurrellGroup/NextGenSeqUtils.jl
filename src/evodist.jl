@@ -1,7 +1,6 @@
 """
     get_pis(sequences)
 """
-
 function get_pis(sequences)
     c= countmap((collect(string(sequences...))))
     return (c['A'], c['C'], c['G'], c['T']) ./ sum([c['A'], c['C'], c['G'], c['T']]);

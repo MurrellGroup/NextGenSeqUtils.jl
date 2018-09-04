@@ -330,7 +330,7 @@ function matchPrimer(seq,forwardPrimers,revPrimers,forwardNames,revNames)
         worstScore = minimum([revSeqFwdPrim[primInd[1]],fwdSeqRevPrim[primInd[2]]])
         retseq = revseq
     end
-    return primInd,forwardNames[primInd[1]]*"_"revNames[primInd[2]],retseq,round(worstScore),(!fwdDir)
+    return primInd,forwardNames[primInd[1]]*"_"*revNames[primInd[2]],retseq,round(worstScore),(!fwdDir)
 end
 
 function deMux(seqs,forwardPrimers,reversePrimers, forwardNames,reverseNames)

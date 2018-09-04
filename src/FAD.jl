@@ -5,7 +5,6 @@ Exploits abundance and neighborhood information to denoise sequences without clu
 on consensus calls. Primarily designed for short amplicons, high quality sequences,
 and good read-per-template coverage
 """
-
 function FAD(seqs; alpha = 0.01, neigh_thresh = 1.0,method = 2,err_rate=0.02, phreds = nothing)
     if !(method in [1,2,3])
         warn("Please pick a method in 1,2,3")

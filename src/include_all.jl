@@ -7,9 +7,10 @@ import BioSequences: reverse_complement
 using Distributions
 using StatsBase
 using Distances
-using MultivariateStats
+#using MultivariateStats
 #using NextGenSeqUtils
 using PyPlot
+using LinearAlgebra
 
 include("phreds.jl")
 include("utils.jl")
