@@ -7,8 +7,10 @@ import BioSequences: reverse_complement
 using Distributions
 using StatsBase
 using Distances
+
+#Uncomment when pull request to METADATA is completed by Multivar
 #using MultivariateStats
-#using NextGenSeqUtils
+
 using PyPlot
 using LinearAlgebra
 
