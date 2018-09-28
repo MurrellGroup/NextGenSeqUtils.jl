@@ -358,6 +358,20 @@ function logsum(lga, lgb)
     return lga > lgb ? (lga + log(1 + exp(lgb - lga))) : (lgb + log(1 + exp(lga - lgb)))
 end
 
+
+"""
+	get_group_inds(arr, func)
+
+Apply a function to a given set of objects, group by equal outputs, and return indices of elements in each group
+"""
+function get_group_inds(arr,func)
+   groupings = [func(i) for i in arr]
+   groups = union(groupings)
+   groupinds = [find(groupings.==i) for i in groups]
+   return groupinds
+end
+
+
 const nl43env = "GAGCAGAAGACAGTGGCAATGAGAGTGAAGGAGAAGTATCAGCACTTGTGGAGATGGGGGTGGAAA"*
 "TGGGGCACCATGCTCCTTGGGATATTGATGATCTGTAGTGCTACAGAAAAATTGTGGGTCACAGTCTATTATGGGGT"*
 "ACCTGTGTGGAAGGAAGCAACCACCACTCTATTTTGTGCATCAGATGCTAAAGCATATGATACAGAGGTACATAATG"*
