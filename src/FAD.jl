@@ -18,12 +18,13 @@ function FAD(seqs; alpha = 0.01, neigh_thresh = 1.0,method = 2,err_rate=0.02, ph
 
     #Need to mod this to work for .fasta files. Perhaps use the number of pairs to approximate the number of error free sequences.
     if phreds != nothing
-        warn("Switching to method 1, phreds missing")
-        method = 1
         #seqs, phreds , _ = read_fastq(fn, seqtype=String);
         noises = [mean(phred_to_p(i)) for i in phreds];
         #Calculate the expected proportion of sequences that are error free.
         expected_zero_errors = mean([pdf(Poisson(noises[i]*length(seqs[i])),0) for i in 1:length(seqs)]);
+    else
+        warn("Switching to method 1, phreds missing")
+        method = 1
     end
 
     counts = countmap(seqs);
