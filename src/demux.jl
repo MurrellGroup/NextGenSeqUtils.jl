@@ -336,7 +336,7 @@ function matchPrimer(qseq::Tuple{Any,Any,Any},forwardPrimers,revPrimers,forwardN
 end
 
 function deMux(qseqs::Tuple{Array,Array,Array},forwardPrimers,reversePrimers, forwardNames,reverseNames)
-    matched = [matchPrimer(qseq,forwardPrimers,reversePrimers,forwardNames,reverseNames) for qseq in zip(qseqs)];
+    matched = [matchPrimer(qseq,forwardPrimers,reversePrimers,forwardNames,reverseNames) for qseq in zip(qseqs[1], qseqs[2], qseqs[3])];
     return [[i[2],i[3], i[5], i[4]] for i in matched]
 end
 
