@@ -297,13 +297,15 @@ function maxcoord(mat)
 end
 
 #THIS PRIMER MATCHING FUNCTION DOESN'T ASSUME WE KNOW PRIMER PAIRS
-function matchPrimer(seq,forwardPrimers,revPrimers,forwardNames,revNames)
-    fwdseq = seq;
-    revseq = reverse_complement(fwdseq);
-    fwdSeqFwdPrim = [IUPAC_nuc_edit_dist(fwdseq[1:length(prim)],prim) for prim in forwardPrimers];
-    revSeqFwdPrim = [IUPAC_nuc_edit_dist(revseq[1:length(prim)],prim) for prim in forwardPrimers];
-    fwdSeqRevPrim = [IUPAC_nuc_edit_dist(fwdseq[1:length(prim)],prim) for prim in revPrimers];
-    revSeqRevPrim = [IUPAC_nuc_edit_dist(revseq[1:length(prim)],prim) for prim in revPrimers];
+function matchPrimer(qseq::Tuple{Any,Any,Any},forwardPrimers,revPrimers,forwardNames,revNames)
+    fwd_qseq = qseq;
+    fwd_seq = fwd_qseq[1];
+    rev_seq = reverse_complement(fwd_seq);
+    rev_qsec = (rev_seq, fwd_qseq[2], fwd_qseq[3]); # The second and third element remain the same
+    fwdSeqFwdPrim = [IUPAC_nuc_edit_dist(fwd_seq[1:length(prim)],prim) for prim in forwardPrimers];
+    revSeqFwdPrim = [IUPAC_nuc_edit_dist(rev_seq[1:length(prim)],prim) for prim in forwardPrimers];
+    fwdSeqRevPrim = [IUPAC_nuc_edit_dist(fwd_seq[1:length(prim)],prim) for prim in revPrimers];
+    revSeqRevPrim = [IUPAC_nuc_edit_dist(rev_seq[1:length(prim)],prim) for prim in revPrimers];
 
     fwdDirectionScores = zeros(length(forwardPrimers),length(revPrimers))
     revDirectionScores = zeros(length(forwardPrimers),length(revPrimers))
@@ -324,17 +326,17 @@ function matchPrimer(seq,forwardPrimers,revPrimers,forwardNames,revNames)
     if fwdDir
         primInd = maxcoord(fwdDirectionScores)
         worstScore = minimum([fwdSeqFwdPrim[primInd[1]],revSeqRevPrim[primInd[2]]])
-        retseq = fwdseq
+        retseq = fwd_qseq
     else
         primInd = maxcoord(revDirectionScores)
         worstScore = minimum([revSeqFwdPrim[primInd[1]],fwdSeqRevPrim[primInd[2]]])
-        retseq = revseq
+        retseq = rev_qseq
     end
     return primInd,forwardNames[primInd[1]]*"_"revNames[primInd[2]],retseq,round(worstScore),(!fwdDir)
 end
 
-function deMux(seqs,forwardPrimers,reversePrimers, forwardNames,reverseNames)
-    matched = [matchPrimer(seq,forwardPrimers,reversePrimers,forwardNames,reverseNames) for seq in seqs];
+function deMux(qseqs::Tuple{Array,Array,Array},forwardPrimers,reversePrimers, forwardNames,reverseNames)
+    matched = [matchPrimer(qseq,forwardPrimers,reversePrimers,forwardNames,reverseNames) for qseq in zip(qseqs)];
     return [[i[2],i[3], i[5], i[4]] for i in matched]
 end
 
