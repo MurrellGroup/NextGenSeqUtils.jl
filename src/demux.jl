@@ -301,7 +301,7 @@ function matchPrimer(qseq::Tuple{Any,Any,Any},forwardPrimers,revPrimers,forwardN
     fwd_qseq = qseq;
     fwd_seq = fwd_qseq[1];
     rev_seq = reverse_complement(fwd_seq);
-    rev_qsec = (rev_seq, fwd_qseq[2], fwd_qseq[3]); # The second and third element remain the same
+    rev_qseq = (rev_seq, fwd_qseq[2], fwd_qseq[3]); # The second and third element remain the same
     fwdSeqFwdPrim = [IUPAC_nuc_edit_dist(fwd_seq[1:length(prim)],prim) for prim in forwardPrimers];
     revSeqFwdPrim = [IUPAC_nuc_edit_dist(rev_seq[1:length(prim)],prim) for prim in forwardPrimers];
     fwdSeqRevPrim = [IUPAC_nuc_edit_dist(fwd_seq[1:length(prim)],prim) for prim in revPrimers];
