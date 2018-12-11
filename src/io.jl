@@ -138,3 +138,20 @@ function write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
     end
     close(stream)
 end
+
+function simple_write_fastq(filename, q_seqs, DNASeqType=false)
+    seqs, phreds, names = q_seqs
+    if !DNASeqType
+        seqs = [DNASequence(s) for s in seqs]
+    end
+    stream = open(FASTQ.Writer, filename)
+    i = 0
+    if length(names) != length(seqs)
+        names = [string("seq_", i) for i in 1:length(seqs)]
+    end
+    for (s, q, n) in zip(seqs, phreds, names)
+        i += 1
+        write(stream, FASTQ.Record(n, s, q))
+    end
+    close(stream)
+end
