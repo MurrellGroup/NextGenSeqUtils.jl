@@ -141,6 +141,11 @@ end
 
 function simple_write_fastq(filename, q_seqs, DNASeqType=false)
     seqs, phreds, names = q_seqs
+	if typeof(seqs) != Tuple{Array,Array,Array}
+		seqs = [seqs];
+		phreds = [phreds];
+		names = [names];
+	end
     if !DNASeqType
         seqs = [DNASequence(s) for s in seqs]
     end
