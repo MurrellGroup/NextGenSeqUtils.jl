@@ -149,7 +149,7 @@ function simple_write_fastq(filename, q_seqs, DNASeqType=false)
     if !DNASeqType
         seqs = [DNASequence(s) for s in seqs]
     end
-    stream = open(FASTQ.Writer, filename)
+    stream = FASTQ.Writer(open(filename, "a"))
     i = 0
     if length(names) != length(seqs)
         names = [string("seq_", i) for i in 1:length(seqs)]
