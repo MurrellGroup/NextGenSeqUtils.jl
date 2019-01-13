@@ -299,7 +299,7 @@ end
 #THIS PRIMER MATCHING FUNCTION DOESN'T ASSUME WE KNOW PRIMER PAIRS
 function matchPrimer(seq,forwardPrimers,revPrimers,forwardNames,revNames)
     fwdseq = seq;
-    revseq = revCompString(fwdseq);
+    revseq = reverse_complement(fwdseq);
     fwdSeqFwdPrim = [IUPAC_nuc_edit_dist(fwdseq[1:length(prim)],prim) for prim in forwardPrimers];
     revSeqFwdPrim = [IUPAC_nuc_edit_dist(revseq[1:length(prim)],prim) for prim in forwardPrimers];
     fwdSeqRevPrim = [IUPAC_nuc_edit_dist(fwdseq[1:length(prim)],prim) for prim in revPrimers];

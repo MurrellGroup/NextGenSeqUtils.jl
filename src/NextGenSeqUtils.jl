@@ -59,6 +59,7 @@ module NextGenSeqUtils
 
     orient_strands,
     orient_to_refs,
+    orient_to_refs_file,
 
     # paths.jl
 

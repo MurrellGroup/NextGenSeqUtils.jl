@@ -11,7 +11,7 @@ Contains a variety of functions for dealing with NGS data.
 
 ## Installation
 ```julia
-Pkg.clone("https://github.com/MurrellGroup/NextGenSeqUtils.jl.git")
+Pkg.add("NextGenSeqUtils")
 
 ```
 

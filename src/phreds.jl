@@ -75,6 +75,8 @@ Writes file with sequences from input file that have all sites within error rate
 function quality_filter(infile, outfile=join(split(infile, ".")[1:end-1], ".") * ".filt.fasta" ; 
                         errorRate = 0.01, minLength = 100, labelPrefix = "seq", errorOut = true)
     seqs, scores, names = read_fastq(infile)
+
+	p_vals = [phred_to_p(score) for score in scores]
     
     inds = quality_filter_inds(seqs, scores, errorRate=errorRate, minLength=minLength)
         
