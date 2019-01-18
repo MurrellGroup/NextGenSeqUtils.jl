@@ -7,7 +7,7 @@ and good read-per-template coverage
 """
 function FAD(seqs; alpha = 0.01, neigh_thresh = 1.0,method = 2,err_rate=0.02, phreds = nothing)
     if !(method in [1,2,3])
-        warn("Please pick a method in 1,2,3")
+        @warn "Please pick a method in 1,2,3"
         return [],[]
     end
     #Method list:
@@ -22,7 +22,7 @@ function FAD(seqs; alpha = 0.01, neigh_thresh = 1.0,method = 2,err_rate=0.02, ph
         #Calculate the expected proportion of sequences that are error free.
         expected_zero_errors = mean([pdf(Poisson(noises[i]*length(seqs[i])),0) for i in 1:length(seqs)]);
     else
-        warn("Switching to method 1, phreds missing")
+        @warn "Switching to method 1, phreds missing"
         method = 1
     end
 
@@ -43,7 +43,7 @@ function FAD(seqs; alpha = 0.01, neigh_thresh = 1.0,method = 2,err_rate=0.02, ph
             else
                 if method == 2
                     inds = collect(1:length(current_set))[neighbour_set]
-                    best = indmax(current_set[inds])
+                    best = findmax(current_set[inds])[2]
                     p_val = (1-cdf(Poisson((current_set[inds][best][1]/expected_zero_errors)*err_rate),seq_freqs[i][1]))*length(seq_freqs[i][2])
                     if p_val < alpha
                         push!(current_set,seq_freqs[i])
@@ -55,7 +55,7 @@ function FAD(seqs; alpha = 0.01, neigh_thresh = 1.0,method = 2,err_rate=0.02, ph
                     #This will use a regular error rate if HP==false, but a much larger error rate if HP==true.
 
                     inds = collect(1:length(current_set))[neighbour_set]
-                    best = indmax(current_set[inds])
+                    best = findmax(current_set[inds])[2]
                     p_val = (1-cdf(Poisson((current_set[inds][best][1]/expected_zero_errors)*err_rate),seq_freqs[i][1]))*length(seq_freqs[i][2])
                     if p_val < alpha
                         push!(current_set,seq_freqs[i])
@@ -69,11 +69,11 @@ function FAD(seqs; alpha = 0.01, neigh_thresh = 1.0,method = 2,err_rate=0.02, ph
         frequencies = zeros(length(current_set))
         for s in seq_freqs_all
             dists = [corrected_kmer_dist_full(k[3],s[3],k=5) for k in current_set]
-            frequencies[indmin(dists)] += s[1]
+            frequencies[findmin(dists)[2]] += s[1]
         end
         return [k[2] for k in current_set],frequencies
     else #catching the condition where there are no duplicates
-        warn("Failing completely. Use RAD instead.")
+        @warn "Failing completely. Use RAD instead."
         return [],[]
     end
 end

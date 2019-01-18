@@ -17,20 +17,20 @@ Return viterbi path and log probability for that path. Takes logs of matrices.
 function viterbi_logs(observations_given_states::Array{Float64, 2}, transitions::Array{Float64, 2}, initials::Array{Float64})
     numstates, numsteps = size(observations_given_states)
     scores = zeros(numstates, numsteps)
-    paths = zeros(scores, UInt16)
+    paths = zeros(UInt16, size(scores))
     # Forward Score propogation
     scores[:, 1] = initials + observations_given_states[:, 1]
     for t in 2:numsteps
         for j in 1:numstates
             transitioned_scores = scores[:, t-1] + transitions[:, j]
-            paths[j, t] = indmax(transitioned_scores)
+            paths[j, t] = findmax(transitioned_scores)[2]
             scores[j, t] = transitioned_scores[paths[j, t]] + observations_given_states[j, t]
         end
     end
     # Backtrack
     path = zeros(Int, numsteps)
-    probs = zeros(path, Float64)
-    path[end] = indmax(scores[:, end])
+    probs = zeros(Float64, numsteps)
+    path[end] = findmax(scores[:, end])[2]
     probs[end] = scores[path[end], end]
     for t in numsteps-1:-1:1
         path[t] = paths[path[t+1], t+1]
@@ -117,7 +117,7 @@ function get_obs_given_state(observation_matrix::Array{Float64,2}, observation_s
     for (i, nuc) in enumerate(observation_seq)
         obs_given_state[i, :] = observation_matrix[:, NUCLEOTIDE_COLS[nuc]]
     end
-    return transpose(obs_given_state)
+    return collect(transpose(obs_given_state))
 end
 
 homopolymer_filter(seqs::Array{String}) = homopolymer_filter(seqs, [], [])[1]
@@ -174,7 +174,7 @@ function homopolymer_filter(seqs::Array{String,1}, phreds, names;
         end
         # make sure no bad parts in middle
         ind = findnext(x->x != 1, path, lo)
-        if ind > hi || ind == 0
+        if ind == 0 || ind == nothing || ind > hi
             push!(newseqs, seq[lo:hi])
             if phredsexist
                 push!(newphreds, phreds[i][lo:hi])

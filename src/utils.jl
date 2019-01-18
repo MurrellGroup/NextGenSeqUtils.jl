@@ -54,7 +54,7 @@ end
 Returns given string without '-' gap symbols.
 """
 function degap(s::String)
-    return replace(s, "-", "")
+    return replace(s, Pair("-", ""))
 end
 
 """

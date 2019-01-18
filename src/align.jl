@@ -36,7 +36,7 @@ function nw_align(s1::String, s2::String; edge_reduction = 0.99, mismatch_cost =
             ins = arr[i-1, j]+(ins_cost*insMult)
             del = arr[i, j-1]+(del_cost*delMult)
             scores = [diag, del, ins]
-            best = indmax(scores)
+            best = findmax(scores)[2]
             arr[i, j] = scores[best]
             traceArr[i-1, j-1] = best
         end
@@ -50,7 +50,7 @@ function nw_align(s1::String, s2::String; edge_reduction = 0.99, mismatch_cost =
     # First compute the trace running backwards. Initialized to the
     # maximum size. With unit penalties, is it possible to tell how
     # big this should be in advance?
-    backtrace = Array{Int}(length(s1arr) + length(s2arr))
+    backtrace = Array{Int,1}(undef, length(s1arr) + length(s2arr))
     # If you hit any boundary, you have to run all the way to the side.
     btInd = 1
     while (trI > 0) && (trJ > 0)
@@ -78,8 +78,8 @@ function nw_align(s1::String, s2::String; edge_reduction = 0.99, mismatch_cost =
     end
 
     backtrace = backtrace[1:btInd-1]
-    ali1arr = Array{Char}(length(backtrace))
-    ali2arr = Array{Char}(length(backtrace))
+    ali1arr = Array{Char,1}(undef, length(backtrace))
+    ali2arr = Array{Char,1}(undef, length(backtrace))
     ind1 = 1
     ind2 = 1
     for i in 1:length(backtrace)
@@ -209,7 +209,7 @@ function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coe
                     (get_band_val(arr, i, j-1, bandwidth, dim_diff)+(del_cost*delMult)) : NaN
 
             scores = [diag, del, ins]
-            best = indmax(scores)
+            best = findmax(scores)[2]
             add_to_band!(arr, scores[best], i, j, bandwidth, dim_diff)
             add_to_band!(traceArr, best, i-1, j-1, bandwidth, dim_diff)                                         
         end
@@ -217,7 +217,7 @@ function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coe
     alignedScore = get_band_val(arr, length(s1arr)+1, length(s2arr)+1, bandwidth, dim_diff)
 
     trI, trJ = length(s1arr), length(s2arr)
-    backtrace = Array{Int}(length(s1arr) + length(s2arr))
+    backtrace = Array{Int,1}(length(s1arr) + length(s2arr))
     btInd = 1
     while (trI > 0) && (trJ > 0)
         backtrace[btInd] = get_band_val(traceArr, trI, trJ, bandwidth, dim_diff)
@@ -246,8 +246,8 @@ function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coe
     end                                                                         
                                                                                 
     backtrace = backtrace[1:btInd-1]           
-    ali1arr = Array{Char}(length(backtrace))                                    
-    ali2arr = Array{Char}(length(backtrace))                                    
+    ali1arr = Array{Char,1}(undef, length(backtrace))                                    
+    ali2arr = Array{Char,1}(undef, length(backtrace))                                    
     ind1 = 1                                                                    
     ind2 = 1                                                                    
     for i in 1:length(backtrace)                                                
@@ -326,7 +326,7 @@ function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundar
             triple_ins = i > 3 ? (arr[i-3, j]+(triple_ins_score(s1qv) * ins_bndry_mult)) : NaN
             triple_del = j > 3 ? (arr[i, j-3]+(triple_del_score(s2qv) * del_bndry_mult)) : NaN
             scores = [diag, del, ins, triple_del, triple_ins]                                           
-            best = indmax(scores)                                               
+            best = findmax(scores)[2]                                      
             arr[i, j] = scores[best]                                           
             traceArr[i-1, j-1] = best
         end
@@ -335,7 +335,7 @@ function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundar
                             
     trI, trJ = length(s1arr), length(s2arr)
     # First compute the trace running backwards
-    backtrace = Array{Int}(length(s1arr) + length(s2arr))                       
+    backtrace = Array{Int,1}(undef, length(s1arr) + length(s2arr))                       
     btInd = 1
     len = 0
     while (trI > 0) && (trJ > 0)                                                
@@ -376,8 +376,11 @@ function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundar
     end                                                                         
                                                                                 
     backtrace = backtrace[1:btInd-1]
-    ali1arr = Array{Char}(len+3)
-    ali2arr = Array{Char}(len+3)
+    ali1arr = Array{Char,1}(undef, len+3)
+    ali2arr = Array{Char,1}(undef, len+3)
+	println(length(ali2arr))
+	println(length(ali1arr))
+	println(len)
     ind1 = 1                                                                    
     ind2 = 1
     i = 1
@@ -451,7 +454,7 @@ function local_align(ref::String, query::String; mismatch_score = -1,
                         0
                     ]
             # record index of max in matrix, track current value and location of high score
-            ind = indmax(score_ij)
+            ind = findmax(score_ij)[2]
             scoremat[i, j] = score_ij[ind]
             scorematdirs[i-1, j-1] = ind
             if score_ij[ind] > hiscore
@@ -466,7 +469,7 @@ function local_align(ref::String, query::String; mismatch_score = -1,
     if !rightaligned
         i, j = hiscore_ij
     end
-    backtrace = Array{UInt8}(length(s1) + length(s2))
+    backtrace = Array{UInt8,1}(undef, length(s1) + length(s2))
     step = 0
     while i > 0 && j > 0
         direction = scorematdirs[i, j]
@@ -495,8 +498,8 @@ function local_align(ref::String, query::String; mismatch_score = -1,
     end
     
     # Construct Strings
-    ali1arr = Array{Char}(step)
-    ali2arr = Array{Char}(step)
+    ali1arr = Array{Char,1}(undef, step)
+    ali2arr = Array{Char,1}(undef, step)
     ind1 = 0
     ind2 = 0
     for k in 1:step

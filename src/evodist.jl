@@ -19,7 +19,7 @@ function get_transition_mat(seq1, seq2; include_dash_seqs = true)
         if a1[i] == '-' || a2[i] == '-'
             continue
         else
-            matrix[findfirst(indices, a1[i]), findfirst(indices, a2[i])] += 1
+            matrix[findfirst(indices .== a1[i]), findfirst(indices .== a2[i])] += 1
         end
     end
     return matrix 

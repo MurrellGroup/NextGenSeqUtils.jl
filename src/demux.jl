@@ -85,7 +85,7 @@ function IUPAC_nuc_edit_dist(s1::String, s2::String; edge_reduction = 0.9999)
             ins = arr[i-1, j]+(ins_cost*insMult)
             del = arr[i, j-1]+(del_cost*delMult)
             scores = [diag, del, ins]
-            best = indmax(scores)
+            best = findmax(scores)[2]
             if best == 1
                 arr[i, j] = diag
             elseif best ==2
@@ -144,7 +144,7 @@ function IUPAC_nuc_nw_align(s1::String, s2::String; edge_reduction = 0.9999)
             ins = arr[i-1, j]+(ins_cost*insMult)
             del = arr[i, j-1]+(del_cost*delMult)
             scores = [diag, del, ins]
-            best = indmax(scores)
+            best = findmax(scores)[2]
             if best == 1
                 arr[i, j] = diag
             elseif best ==2
@@ -280,7 +280,7 @@ function banded_edit_dist(s1::String, s2::String; edge_reduction = 0.99, band_co
                     (get_band_val(arr, i, j-1, bandwidth, dim_diff)+(del_cost*delMult)) : NaN
 
             scores = [diag, del, ins]
-            best = indmax(scores)
+            best = findmax(scores)[2]
             add_to_band!(arr, scores[best], i, j, bandwidth, dim_diff)
             add_to_band!(traceArr, best, i-1, j-1, bandwidth, dim_diff)                                         
         end
@@ -293,7 +293,7 @@ end
 
 #Indmax in 2D, returning the coordinates
 function maxcoord(mat)
-    return ind2sub(mat,indmax(mat))
+    return ind2sub(mat,findmax(mat)[2])
 end
 
 #THIS PRIMER MATCHING FUNCTION DOESN'T ASSUME WE KNOW PRIMER PAIRS
