@@ -1,7 +1,7 @@
 """
     nw_align(s1::String, s2::String; edge_reduction = 0.99)
 
-Returns aligned strings using the Needleman-Wunch Algorithm (quadratic), 
+Returns aligned strings using the Needleman-Wunch Algorithm (quadratic),
 with end gaps penalized slightly less. edge_reduction is a multiplier (usually
 less than one) on gaps on end of strings.
 """
@@ -163,10 +163,10 @@ function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coe
     del_cost = -1.0  # V : vertical
     mismatch_cost = -1.0
     match_cost = 1.0
-    
+
     s1arr = collect(s1)  # vertical
     s2arr = collect(s2)  # horizontal
-    
+
     # dimension difference added to band length on one side
     # to give padding for large sequence length differences
     dim_diff = length(s1arr) - length(s2arr)
@@ -192,26 +192,26 @@ function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coe
             if !(in_band(i, j, bandwidth, dim_diff))
                 break
             end
-            
+
             if in_band(i-1, j-1, bandwidth, dim_diff) && s1arr[i-1] == s2arr[j-1]
                 diag = get_band_val(arr, i-1, j-1, bandwidth, dim_diff) + match_cost
             else
                 diag = get_band_val(arr, i-1, j-1, bandwidth, dim_diff) + mismatch_cost
             end
-            
+
             # to handle the lower edge penalties.
             delMult = (i == length(s1arr)+1) ? edge_reduction : 1
             insMult = (j == length(s2arr)+1) ? edge_reduction : 1
 
-            ins = in_band(i-1, j, bandwidth, dim_diff) ? 
+            ins = in_band(i-1, j, bandwidth, dim_diff) ?
                     (get_band_val(arr, i-1, j, bandwidth, dim_diff)+(ins_cost*insMult)) : NaN
-            del = in_band(i, j-1, bandwidth, dim_diff) ? 
+            del = in_band(i, j-1, bandwidth, dim_diff) ?
                     (get_band_val(arr, i, j-1, bandwidth, dim_diff)+(del_cost*delMult)) : NaN
 
             scores = [diag, del, ins]
             best = findmax(scores)[2]
             add_to_band!(arr, scores[best], i, j, bandwidth, dim_diff)
-            add_to_band!(traceArr, best, i-1, j-1, bandwidth, dim_diff)                                         
+            add_to_band!(traceArr, best, i-1, j-1, bandwidth, dim_diff)
         end
     end
     alignedScore = get_band_val(arr, length(s1arr)+1, length(s2arr)+1, bandwidth, dim_diff)
@@ -228,46 +228,46 @@ function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coe
             trJ += -1
         elseif backtrace[btInd] == 3
             trI += -1
-        else 
+        else
             error("Bad trace value: $(backtrace[btInd]): ($trI, $trJ)")
         end
         btInd += 1
     end
     # If you hit the boundaries not at the top left corner.
     while trI > 0
-        backtrace[btInd] = 3                                                    
+        backtrace[btInd] = 3
         btInd += 1
-        trI += -1                                                               
-    end                                                                         
+        trI += -1
+    end
     while trJ > 0
-        backtrace[btInd] = 2                                                    
-        btInd += 1                                                              
-        trJ += -1                                                               
-    end                                                                         
-                                                                                
-    backtrace = backtrace[1:btInd-1]           
-    ali1arr = Array{Char,1}(undef, length(backtrace))                                    
-    ali2arr = Array{Char,1}(undef, length(backtrace))                                    
-    ind1 = 1                                                                    
-    ind2 = 1                                                                    
-    for i in 1:length(backtrace)                                                
-        tr = backtrace[length(backtrace)-(i-1)]                                 
-        if tr == 1                                                              
-            ali1arr[i] = s1arr[ind1]                                            
-            ali2arr[i] = s2arr[ind2]                                            
-            ind1 += 1                                                           
-            ind2 += 1                                                           
-        elseif tr == 2                                                          
-            ali2arr[i] = s2arr[ind2]                                            
-            ali1arr[i] = '-'                                                    
-            ind2 += 1                                                           
-        elseif tr == 3                                                          
-            ali1arr[i] = s1arr[ind1]                                            
-            ali2arr[i] = '-'                                                    
-            ind1 += 1                                                           
-        end                                                                     
-    end                                                                         
-    return join(ali1arr), join(ali2arr)                                         
+        backtrace[btInd] = 2
+        btInd += 1
+        trJ += -1
+    end
+
+    backtrace = backtrace[1:btInd-1]
+    ali1arr = Array{Char,1}(undef, length(backtrace))
+    ali2arr = Array{Char,1}(undef, length(backtrace))
+    ind1 = 1
+    ind2 = 1
+    for i in 1:length(backtrace)
+        tr = backtrace[length(backtrace)-(i-1)]
+        if tr == 1
+            ali1arr[i] = s1arr[ind1]
+            ali2arr[i] = s2arr[ind2]
+            ind1 += 1
+            ind2 += 1
+        elseif tr == 2
+            ali2arr[i] = s2arr[ind2]
+            ali1arr[i] = '-'
+            ind2 += 1
+        elseif tr == 3
+            ali1arr[i] = s1arr[ind1]
+            ali2arr[i] = '-'
+            ind1 += 1
+        end
+    end
+    return join(ali1arr), join(ali2arr)
 end
 
 
@@ -278,39 +278,39 @@ end
 
 Returns alignment of two sequences where `s1` is a reference with reading frame to be preserved and `s2` is a query sequence.
 `boundary_mult` adjusts penalties for gaps preserving the reading frame of `s1`.
-This usually works best on range 0 to 3, higher values for more strongly enforced gaps aligned on 
-reference frame (divisible-by-3 indices)
+This usually works best on range 0 to 3, higher values for more strongly enforced gaps aligned on
+reading frame (divisible-by-3 indices)
 """
 function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundary_mult = 2)
-    # edge_reduction is a multiplicative score that gets multiplied to          
-    # the penalties along the edges, to prefer terminal gaps.                   
-    ins_cost = -1.0  # -> : horizontal                                          
+    # edge_reduction is a multiplicative score that gets multiplied to
+    # the penalties along the edges, to prefer terminal gaps.
+    ins_cost = -1.0  # -> : horizontal
     del_cost = -1.0  # V : vertical
-    
+
     triple_ins_cost = -0.5
     triple_del_cost = -0.5
     triple_ins_score(qv) = triple_ins_cost
     triple_del_score(qv) = triple_del_cost
-    
+
     mismatch_cost = -0.0
-    match_cost = 1.0                                                        
-                                                                                
-    s1arr = collect(s1)  # vertical                                             
-    s2arr = collect(s2)  # horizontal                                           
-    arr = zeros(length(s1arr)+1, length(s2arr)+1)                               
-    traceArr = zeros(Int, length(s1arr), length(s2arr))                         
-                                                                                
-    # this will need to be generalized when we want to allow overhang           
-    arr[:, 1] = edge_reduction*del_cost*(0:length(s1arr))                       
-    arr[1, :] = edge_reduction*ins_cost*(0:length(s2arr))                        
+    match_cost = 1.0
+
+    s1arr = collect(s1)  # vertical
+    s2arr = collect(s2)  # horizontal
+    arr = zeros(length(s1arr)+1, length(s2arr)+1)
+    traceArr = zeros(Int, length(s1arr), length(s2arr))
+
+    # this will need to be generalized when we want to allow overhang
+    arr[:, 1] = edge_reduction*del_cost*(0:length(s1arr))
+    arr[1, :] = edge_reduction*ins_cost*(0:length(s2arr))
 
     for i in 2:length(s1arr)+1
-        for j in 2:length(s2arr)+1                                              
-            if s1arr[i-1] == s2arr[j-1]                                         
-                diag = arr[i-1, j-1] + match_cost                               
-            else                                                                
-                diag = arr[i-1, j-1] + mismatch_cost                            
-            end                                                                 
+        for j in 2:length(s2arr)+1
+            if s1arr[i-1] == s2arr[j-1]
+                diag = arr[i-1, j-1] + match_cost
+            else
+                diag = arr[i-1, j-1] + mismatch_cost
+            end
 
             # to handle the lower edge penalties.
             delMult = (i == length(s1arr)+1) ? edge_reduction : 1
@@ -323,31 +323,31 @@ function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundar
             # TODO: factor in qv scores
             s1qv = NaN
             s2qv = NaN
-            triple_ins = i > 3 ? (arr[i-3, j]+(triple_ins_score(s1qv) * ins_bndry_mult)) : NaN
-            triple_del = j > 3 ? (arr[i, j-3]+(triple_del_score(s2qv) * del_bndry_mult)) : NaN
-            scores = [diag, del, ins, triple_del, triple_ins]                                           
-            best = findmax(scores)[2]                                      
-            arr[i, j] = scores[best]                                           
+            triple_ins = i > 3 ? (arr[i-3, j]+(triple_ins_score(s1qv) * ins_bndry_mult)) : -Inf
+            triple_del = j > 3 ? (arr[i, j-3]+(triple_del_score(s2qv) * del_bndry_mult)) : -Inf
+            scores = [diag, del, ins, triple_del, triple_ins]
+            best = findmax(scores)[2]
+            arr[i, j] = scores[best]
             traceArr[i-1, j-1] = best
         end
-    end                                                                         
-    alignedScore = arr[end, end]                                                             
-                            
+    end
+    alignedScore = arr[end, end]
+
     trI, trJ = length(s1arr), length(s2arr)
     # First compute the trace running backwards
-    backtrace = Array{Int,1}(undef, length(s1arr) + length(s2arr))                       
+    backtrace = Array{Int,1}(undef, length(s1arr) + length(s2arr))
     btInd = 1
     len = 0
-    while (trI > 0) && (trJ > 0)                                                
-        backtrace[btInd] = traceArr[trI, trJ]                                   
-        if backtrace[btInd] == 1                                                
-            trI += -1                                                           
+    while (trI > 0) && (trJ > 0)
+        backtrace[btInd] = traceArr[trI, trJ]
+        if backtrace[btInd] == 1
+            trI += -1
             trJ += -1
             len += 1
-        elseif backtrace[btInd] == 2                                            
+        elseif backtrace[btInd] == 2
             trJ += -1
             len += 1
-        elseif backtrace[btInd] == 3                                            
+        elseif backtrace[btInd] == 3
             trI += -1
             len += 1
         elseif backtrace[btInd] == 4
@@ -360,45 +360,42 @@ function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundar
             error("uh oh: $(traceArr[trI, trJ])")
         end
         btInd += 1
-    end                                                                         
-    # If you hit the boundaries not at the top left corner.                     
-    while trI > 0                                                               
-        backtrace[btInd] = 3                                                    
-        btInd += 1                                                              
-        trI += -1                                                               
+    end
+    # If you hit the boundaries not at the top left corner.
+    while trI > 0
+        backtrace[btInd] = 3
+        btInd += 1
+        trI += -1
         len += 1
-    end                                                                         
-    while trJ > 0                                                               
-        backtrace[btInd] = 2                                                    
-        btInd += 1                                                              
-        trJ += -1                                                               
+    end
+    while trJ > 0
+        backtrace[btInd] = 2
+        btInd += 1
+        trJ += -1
         len += 1
-    end                                                                         
-                                                                                
+    end
+
     backtrace = backtrace[1:btInd-1]
     ali1arr = Array{Char,1}(undef, len+3)
     ali2arr = Array{Char,1}(undef, len+3)
-	println(length(ali2arr))
-	println(length(ali1arr))
-	println(len)
-    ind1 = 1                                                                    
+    ind1 = 1
     ind2 = 1
     i = 1
-    for tr in reverse(backtrace)                                                
-        if tr == 1                                                              
-            ali1arr[i] = s1arr[ind1]                                            
-            ali2arr[i] = s2arr[ind2]                                            
-            ind1 += 1                                                           
+    for tr in reverse(backtrace)
+        if tr == 1
+            ali1arr[i] = s1arr[ind1]
+            ali2arr[i] = s2arr[ind2]
+            ind1 += 1
             ind2 += 1
             i += 1
-        elseif tr == 2                                                          
-            ali2arr[i] = s2arr[ind2]                                            
-            ali1arr[i] = '-'                                                    
+        elseif tr == 2
+            ali2arr[i] = s2arr[ind2]
+            ali1arr[i] = '-'
             ind2 += 1
             i += 1
-        elseif tr == 3                                                          
-            ali1arr[i] = s1arr[ind1]                                            
-            ali2arr[i] = '-'                                                    
+        elseif tr == 3
+            ali1arr[i] = s1arr[ind1]
+            ali2arr[i] = '-'
             ind1 += 1
             i += 1
         elseif tr == 4
@@ -411,11 +408,10 @@ function triplet_nw_align(s1::String, s2::String; edge_reduction = 0.99, boundar
             ali2arr[i:i+2] = ['-', '-', '-']
             ind1 += 3
             i += 3
-        else error("uh oh: tr = $tr")
         end
     end
     # to fix: weird boundary checking -- sometimes get off by 1 in length
-    return join(ali1arr[1:i-1]), join(ali2arr[1:i-1])                                         
+    return join(ali1arr[1:i-1]), join(ali2arr[1:i-1])
 end
 
 codon_nw_align = triplet_nw_align
@@ -424,18 +420,18 @@ codon_nw_align = triplet_nw_align
 #-------Local Alignment--------
 
 """
-    local_align(ref::String, query::String; mismatch_score = -1, 
-                match_score = 1, gap_penalty = -1, 
+    local_align(ref::String, query::String; mismatch_score = -1,
+                match_score = 1, gap_penalty = -1,
                 rightaligned=true, refend = false)
 
 Aligns a query sequence locally to a reference. If true, `rightaligned` keeps the
-right ends of each sequence in final alignment- otherwise they are trimmed; 
-`refend` keeps the beginning/left end of `ref`. 
+right ends of each sequence in final alignment- otherwise they are trimmed;
+`refend` keeps the beginning/left end of `ref`.
 If you want to keep both ends of both strings, use nw_align.
 For best alignments use the default score values.
 """
-function local_align(ref::String, query::String; mismatch_score = -1, 
-                     match_score = 1, gap_penalty = -1, 
+function local_align(ref::String, query::String; mismatch_score = -1,
+                     match_score = 1, gap_penalty = -1,
                      rightaligned=true, refend = false)
     s1 = ref
     s2 = query
@@ -496,7 +492,7 @@ function local_align(ref::String, query::String; mismatch_score = -1,
         backtrace[step] = 2
         i -= 1
     end
-    
+
     # Construct Strings
     ali1arr = Array{Char,1}(undef, step)
     ali2arr = Array{Char,1}(undef, step)
@@ -527,7 +523,7 @@ end
 #--------Kmer_seeded_align internals---------
 
 """
-Sets value of key in dictionary to given index, unless the key already exists, 
+Sets value of key in dictionary to given index, unless the key already exists,
 in which case value is set to -1.
 """
 function unique_key(dicto::Dict{String, Int}, keyo::String, indo::Int)
@@ -548,7 +544,7 @@ function clean_unique_key(dicto::Dict{String, Int})
 end
 
 """
-Returns a list of indices of matches of unique words between `s1` and `s2`, 
+Returns a list of indices of matches of unique words between `s1` and `s2`,
 sorted by index of `s1`.
 """
 function sorted_matches(s1, s2, wordlength, skip, aligncodons)
@@ -569,7 +565,7 @@ function sorted_matches(s1, s2, wordlength, skip, aligncodons)
             unique_key(word_dict2, s2[i:i+(wordlength-1)], i)  # bounds checked
         end
     end
-    
+
     intersection = Dict{String, UInt8}()
     for (word, ind) in word_dict1
         if ind > 0 && haskey(word_dict2, word) && word_dict2[word] > 0
@@ -577,7 +573,7 @@ function sorted_matches(s1, s2, wordlength, skip, aligncodons)
         end
     end
     common = collect(keys(intersection))
-    matches = zeros(Int, length(common), 2)       
+    matches = zeros(Int, length(common), 2)
     for i in 1:length(common)
         matches[i, 1] = word_dict1[common[i]]
         matches[i, 2] = word_dict2[common[i]]
@@ -586,7 +582,7 @@ function sorted_matches(s1, s2, wordlength, skip, aligncodons)
 end
 
 """
-Returns a list of indices of matches of unique words between `s1` and `s2`, 
+Returns a list of indices of matches of unique words between `s1` and `s2`,
 sorted by index of `s1`. Words match by amino acid encoding, in any reading frame.
 """
 function sorted_aa_matches(str1, str2, wordlength)
@@ -605,7 +601,7 @@ function sorted_aa_matches(str1, str2, wordlength)
         for i in 1:(length(s2) - (div(wordlength, 3) - 1))
             unique_key(word_dict2, s2[i:i+(div(wordlength, 3) - 1)], i*3 + offset - 3)
         end
-    end    
+    end
     intersection = Dict{String, UInt8}()
     for (word, ind) in word_dict1
         if ind > 0 && haskey(word_dict2, word) && word_dict2[word] > 0
@@ -613,7 +609,7 @@ function sorted_aa_matches(str1, str2, wordlength)
         end
     end
     common = collect(keys(intersection))
-    matches = zeros(Int, length(common), 2)       
+    matches = zeros(Int, length(common), 2)
     for i in 1:length(common)
         matches[i, 1] = word_dict1[common[i]]
         matches[i, 2] = word_dict2[common[i]]
@@ -654,7 +650,7 @@ function clean_matches(matches, wordlength, skip)
         # considering the case that skip == diff, rather than skip <
         # diff. Fix later.
         if !(skip < matches[i, 1] - currentvec[1] < wordlength ||
-             (matches[i, 2] - currentvec[2] != skip && 
+             (matches[i, 2] - currentvec[2] != skip &&
               matches[i, 2] - currentvec[2] < wordlength))
             push!(cleanedmatches, matches[i,:])
             currentvec = matches[i,:]
@@ -775,7 +771,7 @@ end
                       banded = 1.0,
                       debug::Bool = false)
 
-Returns aligned strings, where alignment is first done with larger word matches and 
+Returns aligned strings, where alignment is first done with larger word matches and
 then (possibly banded) Needleman-Wunsch on intermediate intervals.
 `skip` gives a necessary gap between searched-for words in `s1`.
 For best results, use the default `wordlength` and `skip` values.
@@ -846,8 +842,8 @@ end
                               alignedcodons = true,
                               debug::Bool=false)
 
-Returns aligned strings, where alignment is first done with word matches and 
-then Needleman-Wunsch on intermediate intervals, prefering to preserve the 
+Returns aligned strings, where alignment is first done with word matches and
+then Needleman-Wunsch on intermediate intervals, prefering to preserve the
 reading frame of the first arg `s1`.
 `skip` gives a necessary gap between searched-for words in `s1`.
 For best results, use the default `wordlength` and `skip` values.
@@ -862,7 +858,7 @@ function triplet_kmer_seeded_align(s1::String, s2::String;
     if !(wordlength % 3 == skip % 3 == 0)
         error("wordlength and skip must be divisible by 3")
     end
-    
+
     if s1 == "" || s2 == ""
         return triplet_nw_align(s1, s2, boundary_mult=boundary_mult)
     end
@@ -907,7 +903,7 @@ end
                                      trimpadding = 100,
                                      debug::Bool=false)
 
-Returns locally aligned strings, where alignment is first done with word matches and 
+Returns locally aligned strings, where alignment is first done with word matches and
 then Needleman-Wunsch on intermediate intervals.
 
 `s1` is a reference to align to, and `s2` is a query to extract a local match from.
@@ -994,7 +990,7 @@ loc_kmer_seeded_align = local_kmer_seeded_align
                           aa_matches = false)
 
 Computes levenshtein edit distance with speedups from only computing the dp scoring matrix between word matches.
-If aa_matches = true, will attempt to find amino acid matches in any reference frame, 
+If aa_matches = true, will attempt to find amino acid matches in any reference frame,
 and add the nucleotide Hamming distance of these matches to Levenshtein distances of mismatches.
 `skip` gives a necessary gap between searched-for words in `s1`.
 For best results, use the default `wordlength` and `skip` values.
@@ -1060,7 +1056,7 @@ resolve_alignments(alignments::Array{String, 1}; mode = 1) = resolve_alignments(
 """
     resolve_alignments(ref::String, query::String; mode = 1)
 
-Called on aligned strings. Resolves `query` with respect to `ref`. 
+Called on aligned strings. Resolves `query` with respect to `ref`.
 `mode` = 1 for resolving single indels, `mode` = 2 for resolving single indels and codon insertions in query.
 """
 function resolve_alignments(ref::String, query::String; mode = 1)
@@ -1072,7 +1068,7 @@ function resolve_alignments(ref::String, query::String; mode = 1)
             continue
         end
         # 1%3 deletions, with gap of length 4 or something
-#        if ((i%3 == 1 && i < length(query) && query[i+1] != '-') || 
+#        if ((i%3 == 1 && i < length(query) && query[i+1] != '-') ||
 #            (i%3 == 0 && query[i-1] != '-')) && single_mod_three_gap(query, i)
 #            query = query[1:i-1] * "N" * query[i+1:end]
         if query[i] == '-' && !triple_gap(query, i)
