@@ -204,9 +204,9 @@ function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coe
             insMult = (j == length(s2arr)+1) ? edge_reduction : 1
 
             ins = in_band(i-1, j, bandwidth, dim_diff) ?
-                    (get_band_val(arr, i-1, j, bandwidth, dim_diff)+(ins_cost*insMult)) : NaN
+                    (get_band_val(arr, i-1, j, bandwidth, dim_diff)+(ins_cost*insMult)) : -Inf
             del = in_band(i, j-1, bandwidth, dim_diff) ?
-                    (get_band_val(arr, i, j-1, bandwidth, dim_diff)+(del_cost*delMult)) : NaN
+                    (get_band_val(arr, i, j-1, bandwidth, dim_diff)+(del_cost*delMult)) : -Inf
 
             scores = [diag, del, ins]
             best = findmax(scores)[2]
@@ -217,7 +217,7 @@ function banded_nw_align(s1::String, s2::String; edge_reduction = 0.99, band_coe
     alignedScore = get_band_val(arr, length(s1arr)+1, length(s2arr)+1, bandwidth, dim_diff)
 
     trI, trJ = length(s1arr), length(s2arr)
-    backtrace = Array{Int,1}(length(s1arr) + length(s2arr))
+    backtrace = Array{Int,1}(undef, length(s1arr) + length(s2arr))
     btInd = 1
     while (trI > 0) && (trJ > 0)
         backtrace[btInd] = get_band_val(traceArr, trI, trJ, bandwidth, dim_diff)
