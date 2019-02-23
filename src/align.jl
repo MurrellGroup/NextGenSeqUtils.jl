@@ -578,7 +578,11 @@ function sorted_matches(s1, s2, wordlength, skip, aligncodons)
         matches[i, 1] = word_dict1[common[i]]
         matches[i, 2] = word_dict2[common[i]]
     end
-    return sortrows(matches, by=x->(x[1]))
+    if length(matches)==0
+        return matches
+    else
+        return sort(matches, by=x->(x[1]), dims=1)
+    end
 end
 
 """
@@ -614,7 +618,11 @@ function sorted_aa_matches(str1, str2, wordlength)
         matches[i, 1] = word_dict1[common[i]]
         matches[i, 2] = word_dict2[common[i]]
     end
-    return sortrows(matches, by=x->(x[1]))
+    if length(matches)==0
+        return matches
+    else
+        return sort(matches, by=x->(x[1]), dims=1)
+    end
 end
 
 """
