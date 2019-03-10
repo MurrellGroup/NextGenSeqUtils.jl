@@ -581,7 +581,7 @@ function sorted_matches(s1, s2, wordlength, skip, aligncodons)
     if length(matches)==0
         return matches
     else
-        return sort(matches, by=x->(x[1]), dims=1)
+        return sortslices(matches, by=x->(x[1]), dims=1)
     end
 end
 
@@ -621,7 +621,7 @@ function sorted_aa_matches(str1, str2, wordlength)
     if length(matches)==0
         return matches
     else
-        return sort(matches, by=x->(x[1]), dims=1)
+        return sortslices(matches, by=x->(x[1]), dims=1)
     end
 end
 
