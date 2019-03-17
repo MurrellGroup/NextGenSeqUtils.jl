@@ -1178,3 +1178,302 @@ function local_edit_dist(s1::String, s2::String)
     end
     return dst
 end
+
+
+"""
+    affine_nw_align(s1::String, s2::String; gap_open = -2.0, gap_extend = -0.2, match_cost = 1.0, mismatch_cost = -1.0)
+
+Performs full slow affine gap alignment. No tricks. No optimization. Use sparingly. Should likely be combined with kmer seeding.
+"""
+function affine_nw_align(s1::String, s2::String;
+    gap_open = -2.0,
+    gap_extend = -0.2,
+    match_cost = 1.0,
+    mismatch_cost = -1.0)
+   
+    s1arr = collect(s1)  # vertical
+    s1len = length(s1arr)
+    s2arr = collect(s2)  # horizontal
+    s2len = length(s2arr)
+  
+    M = zeros(s1len+1, s2len+1)
+    IX = zeros(s1len+1, s2len+1)
+    IY = zeros(s1len+1, s2len+1)
+
+    IX[:,1] .= gap_open .+ gap_extend * (0:s1len)
+    IX[1,:] .= -Inf * [1:s2len+1;]
+    IY[1,:] .= gap_open .+ gap_extend * (0:s2len)
+    IY[:,1] .= -Inf * [1:s1len+1;]
+    M[1:end,1] .= gap_open .+ gap_extend * (0:s1len) #Not sure about this.
+    M[1,1:end] .= gap_open .+ gap_extend * (0:s2len) #Not sure about this.
+    
+    traceM = zeros(Int, s1len+1, s2len+1)
+    traceIX = zeros(Int, s1len+1, s2len+1)
+    traceIY = zeros(Int, s1len+1, s2len+1)
+    
+    #ALSO UNSURE
+    traceM[1,:] .+= 3 
+    traceM[2:end,1] .+= 2
+    
+    traceIX[1,:] .+= 3 
+    traceIY[2:end,1] .+= 2
+    
+    traceIY[1,:] .+= 3 
+    traceIX[2:end,1] .+= 2
+    
+    for i in 2:s1len+1
+        for j in 2:s2len+1
+            diag_cost = 0.0
+            if s1arr[i-1] == s2arr[j-1]
+                diag_cost = match_cost
+            else
+                diag_cost = mismatch_cost
+            end
+            diagM = M[i-1, j-1] + diag_cost
+            IX2M = IX[i-1, j-1] + diag_cost
+            IY2M = IY[i-1, j-1] + diag_cost
+            
+            M[i,j],traceM[i,j] = findmax([diagM,IX2M,IY2M]) #1: stay in M. 2: come from IX. 3: come from IY
+            
+            M2IX = M[i-1, j] + gap_open
+            IXextend = IX[i-1, j] + gap_extend
+            IX[i,j],traceIX[i,j] = findmax([M2IX,IXextend]) #1: gap open. 2: gap extend
+            
+            M2IY = M[i, j-1] + gap_open
+            IYextend = IY[i, j-1] + gap_extend
+            IY[i,j],traceIY[i,j] = findmax([M2IY,-Inf,IYextend]) #1: gap open. 3: gap extend
+              
+        end
+    end
+    
+    rev_arr1 = Char[]
+    rev_arr2 = Char[]
+    sizehint!(rev_arr1, s1len+s2len)
+    sizehint!(rev_arr2, s1len+s2len)
+    
+    mats = [traceM,traceIX,traceIY]
+    x_i = s1len+1
+    y_i = s2len+1
+    m_i = argmax([M[x_i,y_i],IX[x_i,y_i],IY[x_i,y_i]])
+    while x_i-1 > 0 &&  y_i-1 > 0
+        next_m_i = mats[m_i][x_i,y_i]
+        if m_i == 1
+            push!(rev_arr1,s1arr[x_i-1])
+            push!(rev_arr2,s2arr[y_i-1])
+            
+            x_i -= 1
+            y_i -= 1
+        elseif m_i == 2
+            push!(rev_arr1,s1arr[x_i-1])
+            push!(rev_arr2,'-')
+            x_i -= 1
+        elseif m_i == 3
+            push!(rev_arr1,'-')
+            push!(rev_arr2,s2arr[y_i-1])
+            y_i -= 1
+        end
+        m_i = next_m_i
+    end
+    while x_i-1 > 0
+        push!(rev_arr1,s1arr[x_i-1])
+        push!(rev_arr2,'-')
+        x_i -= 1
+    end
+    while y_i-1 > 0
+        push!(rev_arr1,'-')
+        push!(rev_arr2,s2arr[y_i-1])
+        y_i -= 1
+    end
+    return join(reverse(rev_arr1)),join(reverse(rev_arr2))
+end
+
+"""
+A slow profile cost function. Compares two profile "columns" and scores how similar they are.
+If you design you own, try and make them return 1 for perfectly similar and -1 for completely different.
+"""
+function profile_cost(p1::Array{Tuple{Char,Float64},1},p2::Array{Tuple{Char,Float64},1})
+    cost = 0
+    for i in p1
+        for j in p2
+            if i[1]==j[1]
+                cost += i[2]*j[2]
+            else
+                cost = cost - i[2]*j[2]
+            end
+        end
+    end
+    return cost
+end
+
+"""
+A pointless looking function that returns what a profile "gap" element should look like.
+"""
+function gap_elem(typo::Array{Array{Tuple{Char,Float64},1},1})
+    return [('!',1.0)]
+end
+
+"""
+    profile_affine_align(s1, s2, distfunc; gap_open = -2.0,gap_extend = -0.2)
+
+Aligns two profiles, using an affine gap alignment strategy, inserting gap_elem(s1) gap elements wherever indicated.
+"distfunc" should be "profile_cost" if you're using seqs2profile() to get profiles from sequence alignments.
+
+Usage:
+nom1,seqs1 = read_fasta_with_names("alignment1.fasta");
+nom2,seqs2 = read_fasta_with_names("alignment2.fasta");
+prof1 = seqs2profile(seqs1);
+prof2 = seqs2profile(seqs2);
+alip1,alip2 = profile_affine_align(prof1,prof2,profile_cost);
+"""
+function profile_affine_align(s1, s2, distfunc;
+    gap_open = -2.0,
+    gap_extend = -0.2)
+   
+    s1arr = collect(s1)  # vertical
+    s1len = length(s1arr)
+    s2arr = collect(s2)  # horizontal
+    s2len = length(s2arr)
+  
+    M = zeros(s1len+1, s2len+1)
+    IX = zeros(s1len+1, s2len+1)
+    IY = zeros(s1len+1, s2len+1)
+
+    IX[:,1] .= gap_open .+ gap_extend * (0:s1len)
+    IX[1,:] .= -Inf * [1:s2len+1;]
+    IY[1,:] .= gap_open .+ gap_extend * (0:s2len)
+    IY[:,1] .= -Inf * [1:s1len+1;]
+    M[1:end,1] .= gap_open .+ gap_extend * (0:s1len) #Not sure about this.
+    M[1,1:end] .= gap_open .+ gap_extend * (0:s2len) #Not sure about this.
+    
+    traceM = zeros(Int, s1len+1, s2len+1)
+    traceIX = zeros(Int, s1len+1, s2len+1)
+    traceIY = zeros(Int, s1len+1, s2len+1)
+    
+    #ALSO UNSURE
+    traceM[1,:] .+= 3 
+    traceM[2:end,1] .+= 2
+    
+    traceIX[1,:] .+= 3 
+    traceIY[2:end,1] .+= 2
+    
+    traceIY[1,:] .+= 3 
+    traceIX[2:end,1] .+= 2
+    
+    for i in 2:s1len+1
+        for j in 2:s2len+1
+            diag_cost = profile_cost(s1arr[i-1],s2arr[j-1])
+            
+            diagM = M[i-1, j-1] + diag_cost
+            IX2M = IX[i-1, j-1] + diag_cost
+            IY2M = IY[i-1, j-1] + diag_cost
+            
+            M[i,j],traceM[i,j] = findmax([diagM,IX2M,IY2M]) #1: stay in M. 2: come from IX. 3: come from IY
+            
+            M2IX = M[i-1, j] + gap_open
+            IXextend = IX[i-1, j] + gap_extend
+            IX[i,j],traceIX[i,j] = findmax([M2IX,IXextend]) #1: gap open. 2: gap extend
+            
+            M2IY = M[i, j-1] + gap_open
+            IYextend = IY[i, j-1] + gap_extend
+            IY[i,j],traceIY[i,j] = findmax([M2IY,-Inf,IYextend]) #1: gap open. 3: gap extend
+              
+        end
+    end
+    
+    rev_arr1 = typeof(s1)()
+    rev_arr2 = typeof(s1)()
+    sizehint!(rev_arr1, s1len+s2len)
+    sizehint!(rev_arr2, s1len+s2len)
+    
+    mats = [traceM,traceIX,traceIY]
+    x_i = s1len+1
+    y_i = s2len+1
+    m_i = argmax([M[x_i,y_i],IX[x_i,y_i],IY[x_i,y_i]])
+    while x_i-1 > 0 &&  y_i-1 > 0
+        next_m_i = mats[m_i][x_i,y_i]
+        if m_i == 1
+            push!(rev_arr1,s1arr[x_i-1])
+            push!(rev_arr2,s2arr[y_i-1])
+            
+            x_i -= 1
+            y_i -= 1
+        elseif m_i == 2
+            push!(rev_arr1,s1arr[x_i-1])
+            push!(rev_arr2,gap_elem(s1))
+            x_i -= 1
+        elseif m_i == 3
+            push!(rev_arr1,gap_elem(s1))
+            push!(rev_arr2,s2arr[y_i-1])
+            y_i -= 1
+        end
+        m_i = next_m_i
+    end
+    while x_i-1 > 0
+        push!(rev_arr1,s1arr[x_i-1])
+        push!(rev_arr2,gap_elem(s1))
+        x_i -= 1
+    end
+    while y_i-1 > 0
+        push!(rev_arr1,gap_elem(s1))
+        push!(rev_arr2,s2arr[y_i-1])
+        y_i -= 1
+    end
+    return (reverse(rev_arr1)),(reverse(rev_arr2))
+end
+
+"""
+    seqs2profile(seqs::Vector{String})
+
+Converts a vector of aligned sequences into a "profile", where each column is represented by a vector of tuples.
+The first tuple element is the character, and the second is the frequency.
+"""
+function seqs2profile(seqs::Vector{String})
+    if length(union(length.(seqs))) != 1
+        error("Sequences must be aligned (ie. be the same length)")
+    end
+    prof = Array{Array{Tuple{Char,Float64},1},1}([])
+    sizehint!(prof,length(seqs[1]))
+    for i in 1:length(seqs[1])
+        char_dic = proportionmap([s[i] for s in seqs])
+        push!(prof , [(k,char_dic[k]) for k in keys(char_dic)])
+    end
+    return prof
+end
+
+
+"""
+    merge_alignments(seqs1::Vector{String},seqs2::Vector{String}; new_gap_char = '-')
+
+Merges two sequence alignments using profile alignment. Not terribly fast, but useful.
+Return type similar to input type, but with gaps inserted.
+
+Usage example:
+nom1,seqs1 = read_fasta_with_names("alignment1.fasta");
+nom2,seqs2 = read_fasta_with_names("alignment2.fasta");
+ali_s1,ali_s2 = merge_alignments(seqs1,seqs2);
+write_fasta("merged.fasta",vcat(ali_s1,ali_s2),names = vcat(nom1,nom2));
+"""
+function merge_alignments(seqs1::Vector{String},seqs2::Vector{String}; new_gap_char = '-')
+    prof1 = seqs2profile(seqs1);
+    prof2 = seqs2profile(seqs2);
+    
+    alip1,alip2 = profile_affine_align(prof1,prof2,profile_cost);
+    
+    PROF_GAP = gap_elem(prof1)
+    char_matrix = fill(new_gap_char,length(seqs1)+length(seqs2),length(alip1));
+
+    coord1 = 1
+    coord2 = 1
+    len1 = length(seqs1)
+    for s_col in 1:length(alip1)
+        if alip1[s_col] != PROF_GAP
+            char_matrix[1:len1,s_col] = [s[coord1] for s in seqs1]
+            coord1 += 1
+        end
+        if alip2[s_col] != PROF_GAP
+            char_matrix[len1+1:end,s_col] = [s[coord2] for s in seqs2]
+            coord2 += 1
+        end
+    end
+    return [join(char_matrix[i,:]) for i in 1:length(seqs1)],[join(char_matrix[i,:]) for i in length(seqs1)+1:length(seqs1)+length(seqs2)]
+end
