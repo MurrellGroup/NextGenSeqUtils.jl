@@ -20,6 +20,12 @@ module NextGenSeqUtils
     resolve_alignments,
     align_reference_frames,
     local_edit_dist,
+    merge_alignments,
+    seqs2profile,
+    profile_affine_align,
+    gap_elem,
+    profile_cost,
+    affine_nw_align,
 
     # hmm.jl
 
