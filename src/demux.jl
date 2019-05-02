@@ -166,7 +166,7 @@ function IUPAC_nuc_nw_align(s1::String, s2::String; edge_reduction = 0.9999)
     # First compute the trace running backwards. Initialized to the
     # maximum size. With unit penalties, is it possible to tell how
     # big this should be in advance?
-    backtrace = Array{Int}(length(s1arr) + length(s2arr))
+    backtrace = Array{Int}(undef, length(s1arr) + length(s2arr))
     # If you hit any boundary, you have to run all the way to the side.
     btInd = 1
     while (trI > 0) && (trJ > 0)
@@ -199,8 +199,8 @@ function IUPAC_nuc_nw_align(s1::String, s2::String; edge_reduction = 0.9999)
 
     # This will need to be generalized to work on non-strings. Not
     # important.
-    ali1arr = Array{Char}(length(backtrace))
-    ali2arr = Array{Char}(length(backtrace))
+    ali1arr = Array{Char}(undef, length(backtrace))
+    ali2arr = Array{Char}(undef, length(backtrace))
     ind1 = 1
     ind2 = 1
     for i in 1:length(backtrace)
@@ -293,17 +293,18 @@ end
 
 #Indmax in 2D, returning the coordinates
 function maxcoord(mat)
-    return ind2sub(mat,findmax(mat)[2])
+    return findmax(mat)[2]
 end
 
 #THIS PRIMER MATCHING FUNCTION DOESN'T ASSUME WE KNOW PRIMER PAIRS
-function matchPrimer(seq,forwardPrimers,revPrimers,forwardNames,revNames)
+function matchPrimer(seq,forwardPrimers,revPrimers,forwardNames,revNames; epsilon = 2, trim = false, 
+        forwardBarcodeMasks = nothing, reverseBarcodeMasks = nothing, barcoded = false)
     fwdseq = seq;
     revseq = reverse_complement(fwdseq);
-    fwdSeqFwdPrim = [IUPAC_nuc_edit_dist(fwdseq[1:length(prim)],prim) for prim in forwardPrimers];
-    revSeqFwdPrim = [IUPAC_nuc_edit_dist(revseq[1:length(prim)],prim) for prim in forwardPrimers];
-    fwdSeqRevPrim = [IUPAC_nuc_edit_dist(fwdseq[1:length(prim)],prim) for prim in revPrimers];
-    revSeqRevPrim = [IUPAC_nuc_edit_dist(revseq[1:length(prim)],prim) for prim in revPrimers];
+    fwdSeqFwdPrim = [IUPAC_nuc_edit_dist(fwdseq[1:(length(prim) + epsilon)],prim, edge_reduction = 0.5) for prim in forwardPrimers];
+    revSeqFwdPrim = [IUPAC_nuc_edit_dist(revseq[1:(length(prim) + epsilon)],prim, edge_reduction = 0.5) for prim in forwardPrimers];
+    fwdSeqRevPrim = [IUPAC_nuc_edit_dist(fwdseq[1:(length(prim) + epsilon)],prim, edge_reduction = 0.5) for prim in revPrimers];
+    revSeqRevPrim = [IUPAC_nuc_edit_dist(revseq[1:(length(prim) + epsilon)],prim, edge_reduction = 0.5) for prim in revPrimers];
 
     fwdDirectionScores = zeros(length(forwardPrimers),length(revPrimers))
     revDirectionScores = zeros(length(forwardPrimers),length(revPrimers))
@@ -314,56 +315,127 @@ function matchPrimer(seq,forwardPrimers,revPrimers,forwardNames,revNames)
             revDirectionScores[i,j]=revSeqFwdPrim[i]+fwdSeqRevPrim[j];
         end
     end
-    
+
     fwd,back = maximum(fwdDirectionScores),maximum(revDirectionScores)
     
     #fwdDirectionScores = fwdSeqFwdPrim.+revSeqRevPrim;
     #revDirectionScores = revSeqFwdPrim.+fwdSeqRevPrim;
     fwd,back = maximum(fwdDirectionScores),maximum(revDirectionScores)
     fwdDir = fwd>back
+    
+    trunc_inds = nothing
+    fwalign, revalign = nothing, nothing
+    primInd = nothing
+    
     if fwdDir
         primInd = maxcoord(fwdDirectionScores)
         worstScore = minimum([fwdSeqFwdPrim[primInd[1]],revSeqRevPrim[primInd[2]]])
-        retseq = fwdseq
+        if trim 
+            prim1 = forwardPrimers[primInd[1]]
+            prim2 = revPrimers[primInd[2]]
+            fwalign = IUPAC_nuc_nw_align(fwdseq[1:(length(prim1) + epsilon)],prim1, edge_reduction = 0.5)
+            revalign = IUPAC_nuc_nw_align(revseq[1:(length(prim2) + epsilon)],prim2, edge_reduction = 0.5)
+            ind1 = (findlast(x -> x != '-', fwalign[2])) + 1
+            ind2 = length(fwdseq) - (findlast(x -> x != '-', revalign[2]))
+            retseq = fwdseq[ind1:ind2]
+            trunc_inds = ind1:ind2
+        else
+            retseq = fwdseq
+        end
     else
         primInd = maxcoord(revDirectionScores)
         worstScore = minimum([revSeqFwdPrim[primInd[1]],fwdSeqRevPrim[primInd[2]]])
-        retseq = revseq
+        if trim 
+            prim1 = revPrimers[primInd[1]]
+            prim2 = forwardPrimers[primInd[2]]
+            fwalign = IUPAC_nuc_nw_align(revseq[1:(length(prim1) + epsilon)],prim1, edge_reduction = 0.5)
+            revalign = IUPAC_nuc_nw_align(fwdseq[1:(length(prim2) + epsilon)],prim2, edge_reduction = 0.5)
+            ind1 = (findlast(x -> x != '-', fwalign[2])) + 1
+            ind2 = length(revseq) - (findlast(x -> x != '-', revalign[2]))
+            retseq = revseq[ind1:ind2]
+            trunc_inds = ind1:ind2
+        else
+            retseq = revseq
+        end
     end
-    return primInd,forwardNames[primInd[1]]*"_"*revNames[primInd[2]],retseq,round(worstScore),(!fwdDir)
+    
+    barcode_score = 0
+    if barcoded
+        ptr = 1
+        index = 0
+        last_ptr = (findlast(x -> x != '-', fwalign[2]))
+        while ptr <= last_ptr
+            if fwalign[2][ptr] != '-' 
+                index += 1
+            end
+            if forwardBarcodeMasks[primInd[1]][max(index,1)] && fwalign[1] != fwalign[2]
+                barcode_score += 1
+            end
+            ptr += 1
+        end
+        
+        ptr = 1
+        index = 0
+        last_ptr = (findlast(x -> x != '-', revalign[2]))
+        while ptr <= last_ptr
+            if reverseBarcodeMasks[primInd[2]][max(index,1)] && revalign[1] != revalign[2]
+                barcode_score += 1
+            end
+            if revalign[2][ptr] != '-' 
+                index += 1
+            end
+            ptr += 1
+        end
+    end
+    
+    return primInd,forwardNames[primInd[1]]*"_"*revNames[primInd[2]],retseq,round(worstScore),(!fwdDir), trunc_inds, barcode_score 
 end
 
-function deMux(seqs,forwardPrimers,reversePrimers, forwardNames,reverseNames)
-    matched = [matchPrimer(seq,forwardPrimers,reversePrimers,forwardNames,reverseNames) for seq in seqs];
-    return [[i[2],i[3], i[5], i[4]] for i in matched]
+function deMux(seqs,forwardPrimers,reversePrimers, forwardNames,reverseNames; epsilon = 0, trim = false, return_all = false, forwardBarcodeMasks = nothing, reverseBarcodeMasks = nothing, barcoded=false)
+    matched = [matchPrimer(seq,forwardPrimers,reversePrimers,forwardNames,reverseNames, epsilon = epsilon, trim = trim, forwardBarcodeMasks = forwardBarcodeMasks, reverseBarcodeMasks = reverseBarcodeMasks, barcoded=barcoded) for seq in seqs];
+    if return_all
+        return matched
+    else
+        return [[i[2],i[3], i[5], i[4]] for i in matched]
+    end
 end
 
 function demux_fastx(fwdPrimers, revPrimers; minLen = 2300, errorRate = 0.01,
     path = "/Users/vrkumar/Downloads/",
     filename = "LP97.fastq",
-    mismatchThresh = 2
+    mismatchThresh = 4, epsilon = 2, barcodeThresh = 1,
+    trim = true, forwardBarcodeMasks = nothing, reverseBarcodeMasks = nothing, barcoded=false 
 )
     forwardNames = [i[1] for i in fwdPrimers];
     reverseNames = [i[1] for i in revPrimers];
     forwardPrimers = [i[2] for i in fwdPrimers];
     reversePrimers = [i[2] for i in revPrimers];
 
-    newName = path*filename*"_"*string(minLen)*"_"*string(errorRate)*".fastq"
-    usearch_filter(path*filename,newName, errorRate=errorRate,minLength=minLen,labelPrefix="seq",errorOut = true)
-
+    newName = path*filename
+    #usearch_filter(path*filename,newName, errorRate=errorRate,minLength=minLen,labelPrefix="seq",errorOut = true)
+    
     if filename[end] == 'a'
         names, seqs = read_fasta_with_names(newName)
-        phreds = nothing;
+        #phreds = nothing;
     else
         seqs, phreds, names = read_fastq(newName);
     end
-
-    deMuxed = deMux(seqs,forwardPrimers,reversePrimers,forwardNames,reverseNames);
-
-    primerPairs = [i[1] for i in deMuxed];
-    primerMatchedSeqs = [i[2] for i in deMuxed];
-    reversed = [i[3] for i in deMuxed];
+    
+    if phreds != nothing
+        seqs, phreds, names = quality_filter(seqs, phreds, names; errorRate=errorRate)
+    end
+    #seqs, phreds, names = length_filter(seqs, phreds, names, minLength=minLen)
+    
+    deMuxed = [matchPrimer(s,forwardPrimers,reversePrimers,forwardNames,reverseNames, epsilon=epsilon, trim=trim, forwardBarcodeMasks = forwardBarcodeMasks, reverseBarcodeMasks = reverseBarcodeMasks, barcoded=barcoded) for s in seqs];
+    
+    primers = [i[1] for i in deMuxed];
+    primerPairs = [i[2] for i in deMuxed];
+        
+    primerMatchedSeqs = [i[3] for i in deMuxed];
+    reversed = [i[5] for i in deMuxed];
     scores = [i[4] for i in deMuxed]
+    trunc_inds = [i[6] for i in deMuxed]
+    barcode_scores = [i[7] for i in deMuxed]
     
     if phreds != nothing
         out_phreds = [reversed[i] ? reverse(phreds[i]) : phreds[i] for i in 1:length(reversed)]
@@ -373,19 +445,22 @@ function demux_fastx(fwdPrimers, revPrimers; minLen = 2300, errorRate = 0.01,
         
     out = Dict()
     for i in 1:length(primerPairs)
-        if scores[i] > mismatchThresh
+        println(scores[i], barcode_scores[i])
+        if scores[i] < -mismatchThresh || barcode_scores[i] < -barcodeThresh
             continue
         end
         if !(haskey(out, primerPairs[i]))
             out[primerPairs[i]] = [[],[],[]]
         end
         push!(out[primerPairs[i]][1], primerMatchedSeqs[i])
-        push!(out[primerPairs[i]][2], out_phreds[i])
+        push!(out[primerPairs[i]][2], out_phreds[i][trunc_inds[i]])
         push!(out[primerPairs[i]][3], names[i])
     end
-    
+     
     for p in keys(out)
         if phreds != nothing
+            println(length(out[p][1]))
+            println(length(out[p][2]))
             write_fastq(path*p*".fastq", out[p][1], Array{Array{Int8,1},1}(out[p][2]), names = out[p][3])
         else
             write_fasta(path*p*".fastq", out[p][1], names = out[p][3])
