@@ -140,10 +140,12 @@ function length_vs_qual(fasta_path; plot_title = "Length Vs Errors", alpha=0.3)
 	# Following line commented since usearch is no longer used    
 	# dithered_rates = [(1+rand()*0.1-0.05)*i for i in error_rates]
     string_lengths = [length(i) for i in seqs]
+    fig = figure()
     plot(string_lengths, error_rates, ".", alpha=alpha)
     title(plot_title)
     xlabel("Length")
     ylabel("Predicted Error Rate")
+    return fig
     # return dithered_rates
 end
 
