@@ -468,3 +468,174 @@ function demux_fastx(fwdPrimers, revPrimers; minLen = 2300, errorRate = 0.01,
     end
     
 end
+
+
+
+
+#Dictionary-based matching
+function ambig_positions(seq::String)
+    return [1:length(seq);][[!(s in ['A','C','G','T']) for s in seq]]
+end
+function ambig_positions(seq::Array{Char})
+    return ambig_positions(join(seq))
+end
+function IUPAC_char_equals(c1,c2)
+    return IUPAC_equals(IUPACnumDict[c1],IUPACnumDict[c2])
+end
+function ambig_options(c::Char)
+    return ['A','C','G','T'][[IUPAC_char_equals('A',c),IUPAC_char_equals('C',c),IUPAC_char_equals('G',c),IUPAC_char_equals('T',c)]]
+end
+function replace_positions(seq,pos,chars)
+    chararr = collect(seq)
+    for i in 1:length(pos)
+        chararr[pos[i]] = chars[i]
+    end
+    return join(chararr)
+end
+function ambig_expand(seq)
+    inds = ambig_positions(seq)
+    options = [ambig_options(seq[i]) for i in inds]
+    collec = [[]]
+    for to_add in options
+        collec = vcat([[vcat(el,[addit]) for addit in to_add] for el in collec]...)
+    end
+    return [replace_positions(seq,inds,coll) for coll in collec]
+end
+function all_mutants_of_all_ambigs(seq)
+    ambig_seqs = ambig_expand(seq)
+    return vcat([all_mutants(s) for s in ambig_seqs]...)
+end
+function mutate_arr_at_pos!(arr,pos,elem)
+    arr[pos] = elem
+    return arr
+end
+function all_mutants(seq)
+    arr_seq = collect(seq)
+    delsA = join.([vcat(deleteat!(copy(arr_seq),i),['A']) for i in 1:length(arr_seq)])
+    delsC = join.([vcat(deleteat!(copy(arr_seq),i),['C']) for i in 1:length(arr_seq)])
+    delsG = join.([vcat(deleteat!(copy(arr_seq),i),['G']) for i in 1:length(arr_seq)])
+    delsT = join.([vcat(deleteat!(copy(arr_seq),i),['T']) for i in 1:length(arr_seq)])
+    insertsA = join.([insert!(copy(arr_seq),i,'A')[1:end-1] for i in 1:length(arr_seq)])
+    insertsC = join.([insert!(copy(arr_seq),i,'C')[1:end-1] for i in 1:length(arr_seq)])
+    insertsG = join.([insert!(copy(arr_seq),i,'G')[1:end-1] for i in 1:length(arr_seq)])
+    insertsT = join.([insert!(copy(arr_seq),i,'T')[1:end-1] for i in 1:length(arr_seq)])
+    mutatesA = join.([mutate_arr_at_pos!(copy(arr_seq),i,'A')[1:end] for i in 1:length(arr_seq)])
+    mutatesC = join.([mutate_arr_at_pos!(copy(arr_seq),i,'C')[1:end] for i in 1:length(arr_seq)])
+    mutatesG = join.([mutate_arr_at_pos!(copy(arr_seq),i,'G')[1:end] for i in 1:length(arr_seq)])
+    mutatesT = join.([mutate_arr_at_pos!(copy(arr_seq),i,'T')[1:end] for i in 1:length(arr_seq)])
+    return vcat([seq],delsA,delsC,delsG,delsT,insertsA,insertsC,insertsG,insertsT,mutatesA,mutatesC,mutatesG,mutatesT)
+end
+
+export fast_primer_match
+function fast_primer_match(seqs,primers)
+    #Only tolerates a single bp difference between primer and seq
+    #Assumes all filtering primers are the same length.
+    #Note this doesn't mean that the primers actually had to be the same length! 
+    l = length(primers[1])
+    matches = zeros(Int,length(seqs))
+    noisy_primer_map = Dict{String,Int}()
+    for (i,pr) in enumerate(primers)
+        for npr in all_mutants_of_all_ambigs(pr)
+            noisy_primer_map[npr] = i
+        end
+    end
+    for (i,s) in enumerate(seqs)
+        if matches[i] == 0
+            matches[i] = get(noisy_primer_map,s[1:l],0)
+        end
+        if matches[i] == 0
+            matches[i] = -get(noisy_primer_map,reverse_complement(s[end-l+1:end]),0)
+        end
+    end
+    return matches #Return sign is the rev_comp direction. Magnitude is the primer index.
+end
+
+export fast_primer_pair_match
+function fast_primer_pair_match(seqs,fwd_primers,rev_primers)
+    fwd_matches = fast_primer_match(seqs,fwd_primers)
+    rev_matches = fast_primer_match(seqs,rev_primers)
+    problem_count = sum(fwd_matches.*rev_matches .> 0)
+    if problem_count>0
+        @warn "Inconsistencies: $(problem_count)"
+    end
+    keepers = fwd_matches.*rev_matches .< 0
+    rev_comp_bool = fwd_matches .< 0
+    return keepers,abs.(fwd_matches),abs.(rev_matches),rev_comp_bool
+end
+
+export demux_dict
+function demux_dict(seqs,fwd_primers,rev_primers; verbose = true, phreds = nothing)
+    if rev_primers == nothing
+        fwd_matches = fast_primer_match(seqs,fwd_primers)
+        rev_comp_bool = fwd_matches .< 0
+        keepers = abs.(fwd_matches) .> 0
+        fwd_matches = abs.(fwd_matches)
+        pair_keeps = fwd_matches[keepers]        
+    else
+         keepers,fwd_matches,rev_matches,rev_comp_bool = fast_primer_pair_match(seqs,fwd_primers,rev_primers)
+        f_keeps = fwd_matches[keepers]
+        r_keeps = rev_matches[keepers]
+        pair_keeps = [(f_keeps[i],r_keeps[i]) for i in 1:length(f_keeps)]
+    end
+    pair_counts = countmap(pair_keeps)
+    sorted_pairs = sort([(k,pair_counts[k]) for k in keys(pair_counts)])
+    if verbose
+        for s in sorted_pairs
+            println(s[1], " => ", s[2])
+        end
+    end
+    
+    if phreds == nothing
+        seq_dict = Dict()
+        for pair in sorted_pairs
+            seq_dict[pair[1]] = Tuple{String,Int64}[]
+        end
+        for i in 1:length(keepers)
+            if keepers[i]
+                if rev_primers == nothing
+                    d_key = fwd_matches[i]
+                else
+                    d_key = (fwd_matches[i],rev_matches[i])
+                end
+                if rev_comp_bool[i]
+                    push!(seq_dict[d_key],(reverse_complement(seqs[i]),i))
+                else
+                    push!(seq_dict[d_key],(seqs[i],i))
+                end
+            end
+        end
+        return seq_dict
+    else
+        seq_dict = Dict()
+        for pair in sorted_pairs
+            seq_dict[pair[1]] = Tuple{String,Vector{Int8},Int64}[]
+        end
+        for i in 1:length(keepers)
+            if keepers[i]
+                if rev_primers == nothing
+                    d_key = fwd_matches[i]
+                else
+                    d_key = (fwd_matches[i],rev_matches[i])
+                end
+                if rev_comp_bool[i]
+                    push!(seq_dict[d_key],(reverse_complement(seqs[i]),reverse(phreds[i]),i))
+                else
+                    push!(seq_dict[d_key],(seqs[i],phreds[i],i))
+                end
+            end
+        end
+        return seq_dict
+    end
+end
+
+export primer_trim
+function primer_trim(seq,primer; buffer = 3)
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq[1:length(primer)+buffer])
+    gapbool = reverse(collect(a1)) .!= '-'
+    seq[length(primer)-findfirst(gapbool)+buffer+2:end]
+end
+function primer_trim(seq,phreds,primer; buffer = 3)
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq[1:length(primer)+buffer])
+    gapbool = reverse(collect(a1)) .!= '-'
+    seq[length(primer)-findfirst(gapbool)+buffer+2:end],phreds[length(primer)-findfirst(gapbool)+buffer+2:end]
+end
