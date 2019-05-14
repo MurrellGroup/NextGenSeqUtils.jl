@@ -527,7 +527,7 @@ function all_mutants(seq)
 end
 
 export fast_primer_match
-function fast_primer_match(seqs,primers)
+function fast_primer_match(seqs,primers; tol_one_error = true)
     #Only tolerates a single bp difference between primer and seq
     #Assumes all filtering primers are the same length.
     #Note this doesn't mean that the primers actually had to be the same length! 
@@ -535,7 +535,12 @@ function fast_primer_match(seqs,primers)
     matches = zeros(Int,length(seqs))
     noisy_primer_map = Dict{String,Int}()
     for (i,pr) in enumerate(primers)
-        for npr in all_mutants_of_all_ambigs(pr)
+        if tol_one_error
+            targets = all_mutants_of_all_ambigs(pr)
+        else
+            targets = ambig_expand(pr)
+        end
+        for npr in targets
             noisy_primer_map[npr] = i
         end
     end
