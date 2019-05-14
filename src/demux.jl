@@ -556,9 +556,9 @@ function fast_primer_match(seqs,primers; tol_one_error = true)
 end
 
 export fast_primer_pair_match
-function fast_primer_pair_match(seqs,fwd_primers,rev_primers)
-    fwd_matches = fast_primer_match(seqs,fwd_primers)
-    rev_matches = fast_primer_match(seqs,rev_primers)
+function fast_primer_pair_match(seqs,fwd_primers,rev_primers; tol_one_error = true)
+    fwd_matches = fast_primer_match(seqs,fwd_primers,tol_one_error=tol_one_error)
+    rev_matches = fast_primer_match(seqs,rev_primers,tol_one_error=tol_one_error)
     problem_count = sum(fwd_matches.*rev_matches .> 0)
     if problem_count>0
         @warn "Inconsistencies: $(problem_count)"
@@ -569,15 +569,15 @@ function fast_primer_pair_match(seqs,fwd_primers,rev_primers)
 end
 
 export demux_dict
-function demux_dict(seqs,fwd_primers,rev_primers; verbose = true, phreds = nothing)
+function demux_dict(seqs,fwd_primers,rev_primers; verbose = true, phreds = nothing, tol_one_error = true)
     if rev_primers == nothing
-        fwd_matches = fast_primer_match(seqs,fwd_primers)
+        fwd_matches = fast_primer_match(seqs,fwd_primers,tol_one_error=tol_one_error)
         rev_comp_bool = fwd_matches .< 0
         keepers = abs.(fwd_matches) .> 0
         fwd_matches = abs.(fwd_matches)
         pair_keeps = fwd_matches[keepers]        
     else
-         keepers,fwd_matches,rev_matches,rev_comp_bool = fast_primer_pair_match(seqs,fwd_primers,rev_primers)
+         keepers,fwd_matches,rev_matches,rev_comp_bool = fast_primer_pair_match(seqs,fwd_primers,rev_primers,tol_one_error=tol_one_error)
         f_keeps = fwd_matches[keepers]
         r_keeps = rev_matches[keepers]
         pair_keeps = [(f_keeps[i],r_keeps[i]) for i in 1:length(f_keeps)]
