@@ -639,3 +639,16 @@ function primer_trim(seq,phreds,primer; buffer = 3)
     gapbool = reverse(collect(a1)) .!= '-'
     seq[length(primer)-findfirst(gapbool)+buffer+2:end],phreds[length(primer)-findfirst(gapbool)+buffer+2:end]
 end
+
+export primer_peek
+function primer_peek(seqs::Vector{String}; l = 20, N = 30, keep = 20)
+    #Assumptions: No ambigs, and primer sequence goes "barcode+primer"
+    starts = [s[1:l] for s in seqs]
+    ends = [s[end-l+1:end] for s in seqs]
+    pot_primers = countmap(vcat(starts,reverse_complement.(ends)))
+    topN = reverse(sort([(pot_primers[k],k) for k in keys(pot_primers)]))[1:N];
+    for i in enumerate(topN)
+        println(i)
+    end
+    return reverse_complement.(sort(reverse_complement.([i[2] for i in topN[1:keep]])))
+end
