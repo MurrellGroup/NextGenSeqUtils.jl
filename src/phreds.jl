@@ -181,7 +181,7 @@ function fastq_filter(infile, outfile;
     
     println("Calculating filter...")
     lengths = length.(seqs)
-    mean_errors = [mean(NextGenSeqUtils.phred_to_p.(score)) for score in scores]
+    mean_errors = [mean(phred_to_p.(score)) for score in scores]
     inds = [1:length(seqs);][(lengths .< max_length) .& (lengths .> min_length) .& (mean_errors .< error_rate)]
     
     if error_out == true
