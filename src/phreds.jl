@@ -170,3 +170,30 @@ function qual_hist(fasta_path; plot_title = "Quality Hist")
     ylabel("Frequency")
     # return dithered_rates
 end
+
+export fastq_filter
+function fastq_filter(infile, outfile; 
+        error_rate = 0.01, min_length = 30, max_length = 1000000,
+        label_prefix = "seq", error_out = true)
+    
+    println("Reading file...")
+    seqs, scores, names = read_fastq(infile)
+    
+    println("Calculating filter...")
+    lengths = length.(seqs)
+    mean_errors = [mean(NextGenSeqUtils.phred_to_p.(score)) for score in scores]
+    inds = [1:length(seqs);][(lengths .< max_length) .& (lengths .> min_length) .& (mean_errors .< error_rate)]
+    
+    if error_out == true
+        names = ["$label_prefix$(i)|ee=$(mean_errors[i])" for i in inds]
+    else
+        names = ["$label_prefix$(i)" for i in 1:length(inds)]
+    end
+    
+    println("Writing file...")
+    if last(outfile) == 'a'
+        write_fasta(outfile, seqs[inds], names=names)
+    else
+        write_fastq(outfile, seqs[inds], scores[inds], names=names)
+    end
+end
