@@ -635,14 +635,36 @@ end
 
 export primer_trim
 function primer_trim(seq,primer; buffer = 3)
-    a1,a2,score = IUPAC_nuc_nw_align(primer,seq[1:length(primer)+buffer])
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq[1:length(primer)+buffer], edge_reduction = 0.5)
     gapbool = reverse(collect(a1)) .!= '-'
-    seq[length(primer)-findfirst(gapbool)+buffer+2:end]
+    return seq[length(primer)-findfirst(gapbool)+buffer+2:end]
 end
 function primer_trim(seq,phreds,primer; buffer = 3)
-    a1,a2,score = IUPAC_nuc_nw_align(primer,seq[1:length(primer)+buffer])
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq[1:length(primer)+buffer], edge_reduction = 0.5)
     gapbool = reverse(collect(a1)) .!= '-'
-    seq[length(primer)-findfirst(gapbool)+buffer+2:end],phreds[length(primer)-findfirst(gapbool)+buffer+2:end]
+    return seq[length(primer)-findfirst(gapbool)+buffer+2:end],phreds[length(primer)-findfirst(gapbool)+buffer+2:end]
+end
+export primer_trim_reverse
+function primer_trim_reverse(seq,primer; buffer = 3)
+    seq_tail = reverse_complement(seq[end-(length(primer)+buffer)+1:end])
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq_tail, edge_reduction = 0.5)
+    gapbool = reverse(collect(a1)) .!= '-'
+    return seq[1: end-(length(primer)-findfirst(gapbool)+buffer+1)]
+end
+function primer_trim_reverse(seq,phreds,primer; buffer = 3)
+    seq_tail = reverse_complement(seq[end-(length(primer)+buffer)+1:end])
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq_tail, edge_reduction = 0.5)
+    gapbool = reverse(collect(a1)) .!= '-'
+    return seq[1: end-(length(primer)-findfirst(gapbool)+buffer+1)], phreds[1: end-(length(primer)-findfirst(gapbool)+buffer+1)]
+end
+export double_primer_trim
+function double_primer_trim(seq,fwd_primer,rev_primer; buffer = 3)
+    t1 = primer_trim(seq,fwd_primer, buffer = buffer)
+    return primer_trim_reverse(t1,rev_primer, buffer = buffer)
+end
+function double_primer_trim(seq,phreds,fwd_primer,rev_primer; buffer = 3)
+    t1,p1 = primer_trim(seq,phreds,fwd_primer, buffer = buffer)
+    return primer_trim_reverse(t1,p1,rev_primer, buffer = buffer)
 end
 
 export primer_peek
