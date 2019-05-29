@@ -166,7 +166,7 @@ function IUPAC_nuc_nw_align(s1::String, s2::String; edge_reduction = 0.9999)
     # First compute the trace running backwards. Initialized to the
     # maximum size. With unit penalties, is it possible to tell how
     # big this should be in advance?
-    backtrace = Array{Int}(length(s1arr) + length(s2arr))
+    backtrace = Array{Int}(undef, length(s1arr) + length(s2arr))
     # If you hit any boundary, you have to run all the way to the side.
     btInd = 1
     while (trI > 0) && (trJ > 0)
@@ -199,8 +199,8 @@ function IUPAC_nuc_nw_align(s1::String, s2::String; edge_reduction = 0.9999)
 
     # This will need to be generalized to work on non-strings. Not
     # important.
-    ali1arr = Array{Char}(length(backtrace))
-    ali2arr = Array{Char}(length(backtrace))
+    ali1arr = Array{Char}(undef, length(backtrace))
+    ali2arr = Array{Char}(undef, length(backtrace))
     ind1 = 1
     ind2 = 1
     for i in 1:length(backtrace)
@@ -293,103 +293,214 @@ end
 
 #Indmax in 2D, returning the coordinates
 function maxcoord(mat)
-    return ind2sub(mat,findmax(mat)[2])
+    return findmax(mat)[2]
 end
 
-#THIS PRIMER MATCHING FUNCTION DOESN'T ASSUME WE KNOW PRIMER PAIRS
-function matchPrimer(seq,forwardPrimers,revPrimers,forwardNames,revNames)
-    fwdseq = seq;
-    revseq = reverse_complement(fwdseq);
-    fwdSeqFwdPrim = [IUPAC_nuc_edit_dist(fwdseq[1:length(prim)],prim) for prim in forwardPrimers];
-    revSeqFwdPrim = [IUPAC_nuc_edit_dist(revseq[1:length(prim)],prim) for prim in forwardPrimers];
-    fwdSeqRevPrim = [IUPAC_nuc_edit_dist(fwdseq[1:length(prim)],prim) for prim in revPrimers];
-    revSeqRevPrim = [IUPAC_nuc_edit_dist(revseq[1:length(prim)],prim) for prim in revPrimers];
 
-    fwdDirectionScores = zeros(length(forwardPrimers),length(revPrimers))
-    revDirectionScores = zeros(length(forwardPrimers),length(revPrimers))
-    
-    for i in 1:length(forwardPrimers)
-        for j in 1:length(revPrimers)
-            fwdDirectionScores[i,j]=fwdSeqFwdPrim[i]+revSeqRevPrim[j];
-            revDirectionScores[i,j]=revSeqFwdPrim[i]+fwdSeqRevPrim[j];
-        end
+#Dictionary-based matching
+function ambig_positions(seq::String)
+    return [1:length(seq);][[!(s in ['A','C','G','T']) for s in seq]]
+end
+function ambig_positions(seq::Array{Char})
+    return ambig_positions(join(seq))
+end
+function IUPAC_char_equals(c1,c2)
+    return IUPAC_equals(IUPACnumDict[c1],IUPACnumDict[c2])
+end
+function ambig_options(c::Char)
+    return ['A','C','G','T'][[IUPAC_char_equals('A',c),IUPAC_char_equals('C',c),IUPAC_char_equals('G',c),IUPAC_char_equals('T',c)]]
+end
+function replace_positions(seq,pos,chars)
+    chararr = collect(seq)
+    for i in 1:length(pos)
+        chararr[pos[i]] = chars[i]
     end
-    
-    fwd,back = maximum(fwdDirectionScores),maximum(revDirectionScores)
-    
-    #fwdDirectionScores = fwdSeqFwdPrim.+revSeqRevPrim;
-    #revDirectionScores = revSeqFwdPrim.+fwdSeqRevPrim;
-    fwd,back = maximum(fwdDirectionScores),maximum(revDirectionScores)
-    fwdDir = fwd>back
-    if fwdDir
-        primInd = maxcoord(fwdDirectionScores)
-        worstScore = minimum([fwdSeqFwdPrim[primInd[1]],revSeqRevPrim[primInd[2]]])
-        retseq = fwdseq
-    else
-        primInd = maxcoord(revDirectionScores)
-        worstScore = minimum([revSeqFwdPrim[primInd[1]],fwdSeqRevPrim[primInd[2]]])
-        retseq = revseq
+    return join(chararr)
+end
+function ambig_expand(seq)
+    inds = ambig_positions(seq)
+    options = [ambig_options(seq[i]) for i in inds]
+    collec = [[]]
+    for to_add in options
+        collec = vcat([[vcat(el,[addit]) for addit in to_add] for el in collec]...)
     end
-    return primInd,forwardNames[primInd[1]]*"_"*revNames[primInd[2]],retseq,round(worstScore),(!fwdDir)
+    return [replace_positions(seq,inds,coll) for coll in collec]
+end
+function all_mutants_of_all_ambigs(seq)
+    ambig_seqs = ambig_expand(seq)
+    return vcat([all_mutants(s) for s in ambig_seqs]...)
+end
+function mutate_arr_at_pos!(arr,pos,elem)
+    arr[pos] = elem
+    return arr
+end
+function all_mutants(seq)
+    arr_seq = collect(seq)
+    delsA = join.([vcat(deleteat!(copy(arr_seq),i),['A']) for i in 1:length(arr_seq)])
+    delsC = join.([vcat(deleteat!(copy(arr_seq),i),['C']) for i in 1:length(arr_seq)])
+    delsG = join.([vcat(deleteat!(copy(arr_seq),i),['G']) for i in 1:length(arr_seq)])
+    delsT = join.([vcat(deleteat!(copy(arr_seq),i),['T']) for i in 1:length(arr_seq)])
+    insertsA = join.([insert!(copy(arr_seq),i,'A')[1:end-1] for i in 1:length(arr_seq)])
+    insertsC = join.([insert!(copy(arr_seq),i,'C')[1:end-1] for i in 1:length(arr_seq)])
+    insertsG = join.([insert!(copy(arr_seq),i,'G')[1:end-1] for i in 1:length(arr_seq)])
+    insertsT = join.([insert!(copy(arr_seq),i,'T')[1:end-1] for i in 1:length(arr_seq)])
+    mutatesA = join.([mutate_arr_at_pos!(copy(arr_seq),i,'A')[1:end] for i in 1:length(arr_seq)])
+    mutatesC = join.([mutate_arr_at_pos!(copy(arr_seq),i,'C')[1:end] for i in 1:length(arr_seq)])
+    mutatesG = join.([mutate_arr_at_pos!(copy(arr_seq),i,'G')[1:end] for i in 1:length(arr_seq)])
+    mutatesT = join.([mutate_arr_at_pos!(copy(arr_seq),i,'T')[1:end] for i in 1:length(arr_seq)])
+    return vcat([seq],delsA,delsC,delsG,delsT,insertsA,insertsC,insertsG,insertsT,mutatesA,mutatesC,mutatesG,mutatesT)
 end
 
-function deMux(seqs,forwardPrimers,reversePrimers, forwardNames,reverseNames)
-    matched = [matchPrimer(seq,forwardPrimers,reversePrimers,forwardNames,reverseNames) for seq in seqs];
-    return [[i[2],i[3], i[5], i[4]] for i in matched]
-end
-
-function demux_fastx(fwdPrimers, revPrimers; minLen = 2300, errorRate = 0.01,
-    path = "/Users/vrkumar/Downloads/",
-    filename = "LP97.fastq",
-    mismatchThresh = 2
-)
-    forwardNames = [i[1] for i in fwdPrimers];
-    reverseNames = [i[1] for i in revPrimers];
-    forwardPrimers = [i[2] for i in fwdPrimers];
-    reversePrimers = [i[2] for i in revPrimers];
-
-    newName = path*filename*"_"*string(minLen)*"_"*string(errorRate)*".fastq"
-    usearch_filter(path*filename,newName, errorRate=errorRate,minLength=minLen,labelPrefix="seq",errorOut = true)
-
-    if filename[end] == 'a'
-        names, seqs = read_fasta_with_names(newName)
-        phreds = nothing;
-    else
-        seqs, phreds, names = read_fastq(newName);
-    end
-
-    deMuxed = deMux(seqs,forwardPrimers,reversePrimers,forwardNames,reverseNames);
-
-    primerPairs = [i[1] for i in deMuxed];
-    primerMatchedSeqs = [i[2] for i in deMuxed];
-    reversed = [i[3] for i in deMuxed];
-    scores = [i[4] for i in deMuxed]
-    
-    if phreds != nothing
-        out_phreds = [reversed[i] ? reverse(phreds[i]) : phreds[i] for i in 1:length(reversed)]
-    else
-        out_phreds = [0 for i in 1:length(reversed)]
-    end
-        
-    out = Dict()
-    for i in 1:length(primerPairs)
-        if scores[i] > mismatchThresh
-            continue
-        end
-        if !(haskey(out, primerPairs[i]))
-            out[primerPairs[i]] = [[],[],[]]
-        end
-        push!(out[primerPairs[i]][1], primerMatchedSeqs[i])
-        push!(out[primerPairs[i]][2], out_phreds[i])
-        push!(out[primerPairs[i]][3], names[i])
-    end
-    
-    for p in keys(out)
-        if phreds != nothing
-            write_fastq(path*p*".fastq", out[p][1], Array{Array{Int8,1},1}(out[p][2]), names = out[p][3])
+export fast_primer_match
+function fast_primer_match(seqs,primers; tol_one_error = true)
+    #Only tolerates a single bp difference between primer and seq
+    #Assumes all filtering primers are the same length.
+    #Note this doesn't mean that the primers actually had to be the same length! 
+    l = length(primers[1])
+    matches = zeros(Int,length(seqs))
+    noisy_primer_map = Dict{String,Int}()
+    for (i,pr) in enumerate(primers)
+        if tol_one_error
+            targets = all_mutants_of_all_ambigs(pr)
         else
-            write_fasta(path*p*".fastq", out[p][1], names = out[p][3])
+            targets = ambig_expand(pr)
+        end
+        for npr in targets
+            noisy_primer_map[npr] = i
+        end
+    end
+    for (i,s) in enumerate(seqs)
+        if matches[i] == 0
+            matches[i] = get(noisy_primer_map,s[1:l],0)
+        end
+        if matches[i] == 0
+            matches[i] = -get(noisy_primer_map,reverse_complement(s[end-l+1:end]),0)
+        end
+    end
+    return matches #Return sign is the rev_comp direction. Magnitude is the primer index.
+end
+
+export fast_primer_pair_match
+function fast_primer_pair_match(seqs,fwd_primers,rev_primers; tol_one_error = true)
+    fwd_matches = fast_primer_match(seqs,fwd_primers,tol_one_error=tol_one_error)
+    rev_matches = fast_primer_match(seqs,rev_primers,tol_one_error=tol_one_error)
+    problem_count = sum(fwd_matches.*rev_matches .> 0)
+    if problem_count>0
+        @warn "Inconsistencies: $(problem_count)"
+    end
+    keepers = fwd_matches.*rev_matches .< 0
+    rev_comp_bool = fwd_matches .< 0
+    return keepers,abs.(fwd_matches),abs.(rev_matches),rev_comp_bool
+end
+
+export demux_dict
+function demux_dict(seqs,fwd_primers,rev_primers; verbose = true, phreds = nothing, tol_one_error = true)
+    if rev_primers == nothing
+        fwd_matches = fast_primer_match(seqs,fwd_primers,tol_one_error=tol_one_error)
+        rev_comp_bool = fwd_matches .< 0
+        keepers = abs.(fwd_matches) .> 0
+        fwd_matches = abs.(fwd_matches)
+        pair_keeps = fwd_matches[keepers]        
+    else
+         keepers,fwd_matches,rev_matches,rev_comp_bool = fast_primer_pair_match(seqs,fwd_primers,rev_primers,tol_one_error=tol_one_error)
+        f_keeps = fwd_matches[keepers]
+        r_keeps = rev_matches[keepers]
+        pair_keeps = [(f_keeps[i],r_keeps[i]) for i in 1:length(f_keeps)]
+    end
+    pair_counts = countmap(pair_keeps)
+    sorted_pairs = sort([(k,pair_counts[k]) for k in keys(pair_counts)])
+    if verbose
+        for s in sorted_pairs
+            println(s[1], " => ", s[2])
         end
     end
     
+    if phreds == nothing
+        seq_dict = Dict()
+        for pair in sorted_pairs
+            seq_dict[pair[1]] = Tuple{String,Int64}[]
+        end
+        for i in 1:length(keepers)
+            if keepers[i]
+                if rev_primers == nothing
+                    d_key = fwd_matches[i]
+                else
+                    d_key = (fwd_matches[i],rev_matches[i])
+                end
+                if rev_comp_bool[i]
+                    push!(seq_dict[d_key],(reverse_complement(seqs[i]),i))
+                else
+                    push!(seq_dict[d_key],(seqs[i],i))
+                end
+            end
+        end
+        return seq_dict
+    else
+        seq_dict = Dict()
+        for pair in sorted_pairs
+            seq_dict[pair[1]] = Tuple{String,Vector{Int8},Int64}[]
+        end
+        for i in 1:length(keepers)
+            if keepers[i]
+                if rev_primers == nothing
+                    d_key = fwd_matches[i]
+                else
+                    d_key = (fwd_matches[i],rev_matches[i])
+                end
+                if rev_comp_bool[i]
+                    push!(seq_dict[d_key],(reverse_complement(seqs[i]),reverse(phreds[i]),i))
+                else
+                    push!(seq_dict[d_key],(seqs[i],phreds[i],i))
+                end
+            end
+        end
+        return seq_dict
+    end
+end
+
+export primer_trim
+function primer_trim(seq,primer; buffer = 3)
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq[1:length(primer)+buffer], edge_reduction = 0.5)
+    gapbool = reverse(collect(a1)) .!= '-'
+    return seq[length(primer)-findfirst(gapbool)+buffer+2:end]
+end
+function primer_trim(seq,phreds,primer; buffer = 3)
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq[1:length(primer)+buffer], edge_reduction = 0.5)
+    gapbool = reverse(collect(a1)) .!= '-'
+    return seq[length(primer)-findfirst(gapbool)+buffer+2:end],phreds[length(primer)-findfirst(gapbool)+buffer+2:end]
+end
+export primer_trim_reverse
+function primer_trim_reverse(seq,primer; buffer = 3)
+    seq_tail = reverse_complement(seq[end-(length(primer)+buffer)+1:end])
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq_tail, edge_reduction = 0.5)
+    gapbool = reverse(collect(a1)) .!= '-'
+    return seq[1: end-(length(primer)-findfirst(gapbool)+buffer+1)]
+end
+function primer_trim_reverse(seq,phreds,primer; buffer = 3)
+    seq_tail = reverse_complement(seq[end-(length(primer)+buffer)+1:end])
+    a1,a2,score = IUPAC_nuc_nw_align(primer,seq_tail, edge_reduction = 0.5)
+    gapbool = reverse(collect(a1)) .!= '-'
+    return seq[1: end-(length(primer)-findfirst(gapbool)+buffer+1)], phreds[1: end-(length(primer)-findfirst(gapbool)+buffer+1)]
+end
+export double_primer_trim
+function double_primer_trim(seq,fwd_primer,rev_primer; buffer = 3)
+    t1 = primer_trim(seq,fwd_primer, buffer = buffer)
+    return primer_trim_reverse(t1,rev_primer, buffer = buffer)
+end
+function double_primer_trim(seq,phreds,fwd_primer,rev_primer; buffer = 3)
+    t1,p1 = primer_trim(seq,phreds,fwd_primer, buffer = buffer)
+    return primer_trim_reverse(t1,p1,rev_primer, buffer = buffer)
+end
+
+export primer_peek
+function primer_peek(seqs::Vector{String}; l = 20, N = 30, keep = 20)
+    #Assumptions: No ambigs, and primer sequence goes "barcode+primer"
+    starts = [s[1:l] for s in seqs]
+    ends = [s[end-l+1:end] for s in seqs]
+    pot_primers = countmap(vcat(starts,reverse_complement.(ends)))
+    topN = reverse(sort([(pot_primers[k],k) for k in keys(pot_primers)]))[1:N];
+    for i in enumerate(topN)
+        println(i)
+    end
+    return reverse_complement.(sort(reverse_complement.([i[2] for i in topN[1:keep]])))
 end
