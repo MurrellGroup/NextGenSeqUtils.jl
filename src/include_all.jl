@@ -1,7 +1,7 @@
 using Reexport
 
 # reexport gives the Levenshtein function in scope of file with "include" call
-@reexport using Levenshtein
+#@reexport using Levenshtein
 using BioSequences
 import BioSequences: reverse_complement
 using Distributions
@@ -27,3 +27,4 @@ include("wrappers.jl")
 include("demux.jl")
 include("FAD.jl")
 include("evodist.jl")
+include("levenshtein.jl")

@@ -128,8 +128,10 @@ module NextGenSeqUtils
     FAD,
 
     #evodist
-    estimate_distance
-    
+    estimate_distance,
+ 
+    #levenshtein
+    levenshtein    
 	
 end # module
 
