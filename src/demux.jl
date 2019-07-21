@@ -504,3 +504,68 @@ function primer_peek(seqs::Vector{String}; l = 20, N = 30, keep = 20)
     end
     return reverse_complement.(sort(reverse_complement.([i[2] for i in topN[1:keep]])))
 end
+
+export iterative_primer_match
+function iterative_primer_match(seqs,full_primers,window::Int,slide_by::Int;tol_one_error=true)
+    if(slide_by + window - 1 > minimum(length.(full_primers)))
+        @warn ("Matching window extends beyond shortest primer. This is ok, but check that you aren't matching something too short.")
+    end
+    primers = [p[1:min(window,minimum(length.(full_primers)))] for p in full_primers]
+    filter = fast_primer_match(seqs,primers,tol_one_error=tol_one_error);
+    for i in 2:slide_by
+        unresolved = filter .== 0
+        primers = [p[i:min(i + window - 1,minimum(length.(full_primers)))] for p in full_primers]
+        filter[unresolved] = fast_primer_match(seqs[unresolved],primers,tol_one_error=tol_one_error);
+    end
+    return filter
+end
+
+export sliding_demux_dict
+function sliding_demux_dict(seqs,fwd_primers,window::Int,slide_by::Int; verbose = true, phreds = nothing, tol_one_error = true)
+    fwd_matches = iterative_primer_match(seqs,fwd_primers,window,slide_by,tol_one_error=tol_one_error)
+    rev_comp_bool = fwd_matches .< 0
+    keepers = abs.(fwd_matches) .> 0
+    fwd_matches = abs.(fwd_matches)
+    pair_keeps = fwd_matches[keepers]        
+    pair_counts = countmap(pair_keeps)
+    sorted_pairs = sort([(k,pair_counts[k]) for k in keys(pair_counts)])
+    if verbose
+        for s in sorted_pairs
+            println(s[1], " => ", s[2])
+        end
+    end
+    if phreds == nothing
+        seq_dict = Dict()
+        for pair in sorted_pairs
+            seq_dict[pair[1]] = Tuple{String,Int64}[]
+        end
+        for i in 1:length(keepers)
+            if keepers[i]
+                d_key = fwd_matches[i]
+
+                if rev_comp_bool[i]
+                    push!(seq_dict[d_key],(reverse_complement(seqs[i]),i))
+                else
+                    push!(seq_dict[d_key],(seqs[i],i))
+                end
+            end
+        end
+        return seq_dict
+    else
+        seq_dict = Dict()
+        for pair in sorted_pairs
+            seq_dict[pair[1]] = Tuple{String,Vector{Int8},Int64}[]
+        end
+        for i in 1:length(keepers)
+            if keepers[i]
+                d_key = fwd_matches[i]
+                if rev_comp_bool[i]
+                    push!(seq_dict[d_key],(reverse_complement(seqs[i]),reverse(phreds[i]),i))
+                else
+                    push!(seq_dict[d_key],(seqs[i],phreds[i],i))
+                end
+            end
+        end
+        return seq_dict
+    end
+end
