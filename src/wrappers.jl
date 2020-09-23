@@ -144,11 +144,11 @@ end
 
 
 """
-    mafft_consensus{T<:BioSequence}(seqs::Vector{T}; kwargs...)
+    mafft_consensus{T<:LongSequence}(seqs::Vector{T}; kwargs...)
 
 Julia wrapper for mafft.
 """
-function mafft_consensus(seqs::Vector{T},; kwargs...) where T <: BioSequence
+function mafft_consensus(seqs::Vector{T},; kwargs...) where T <: LongSequence
     mktempdir() do mydir
         seqfile = string(mydir, "/sequences.fasta")
         mafftout = string(mydir, "/mafft.fasta")

@@ -121,4 +121,4 @@ wrappers.jl:function usearch_filter(inFastqPath, outFastXPath;
 wrappers.jl:function usearch_ref(inFastXPath, outFastaPath, referenceString;
 wrappers.jl:function usearch_ref_database(inFastXPath, outFastaPath, referencePath;
 wrappers.jl:function mafft(inpath, outpath; path="", flags::Vector{String}=String[], kwargs...)
-wrappers.jl:function mafft_consensus{T<:BioSequence}(seqs::Vector{T}; kwargs...)
+wrappers.jl:function mafft_consensus{T<:LongSequence}(seqs::Vector{T}; kwargs...)

@@ -215,9 +215,9 @@ function homopolymer_filter(sourcepath::String, destpath::String;
                                                  initialdist=initialdist)
     println("Writing $(length(newseqs)) sequences")
     if format == "fastq"
-        write_fastq(destpath, newseqs, newphreds, names=newnames, LongCharSequence=false)
+        write_fastq(destpath, newseqs, newphreds, names=newnames, LongSequence=false)
     else
-        write_fasta(destpath, newseqs, names=newnames, LongCharSequence=false)
+        write_fasta(destpath, newseqs, names=newnames, LongSequence=false)
     end     
 end
 

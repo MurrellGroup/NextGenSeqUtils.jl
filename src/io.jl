@@ -110,14 +110,14 @@ end
 
 """
     write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
-                     names=String[], LongCharSequence = false)
+                     names=String[], LongSequence = false)
 
 Write given sequences, phreds, names to .fastq file with given file path.
 If `names` not provided, gives names 'seq_1', etc.
 """
 function write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
-                     names=String[], LongCharSequence = false)
-    if !LongCharSequence
+                     names=String[], LongSequence = false)
+    if !LongSequence
         seqs = [LongCharSequence(s) for s in seqs]
     end
     stream = open(FASTQ.Writer, filename)

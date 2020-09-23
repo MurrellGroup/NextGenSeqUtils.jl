@@ -58,12 +58,12 @@ function degap(s::String)
 end
 
 """
-    degap(s::LongSequence)
+    degap(s::LongCharSeq)
 
 Returns given string without '-' gap symbols.
 """
-function degap(s::LongSequence)
-    return LongSequence(degap(String(s)))
+function degap(s::LongCharSeq)
+    return LongCharSeq(degap(String(s)))
 end
 
 """
@@ -150,7 +150,7 @@ end
 Returns the complement of the reverse of given nucleotide sequence.
 """
 function reverse_complement(dna_string::String)
-    return String(reverse_complement(LongSequence(dna_string)))
+    return String(reverse_complement(LongCharSeq(dna_string)))
 end
 
 """
