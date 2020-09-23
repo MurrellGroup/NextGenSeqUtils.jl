@@ -12,7 +12,6 @@ Count kmers of size `k` in string, return array with bins from "A...A" to "T...T
 and value in each bin corresponding to number of occurences of that kmer within `str`.
 """
 function kmer_count(str::String, k::Int)
-    # TODO: could directly encode `str` as 2-bit BioSequence
     bins = zeros(eltype(KmerType), 4^k)
 
     mask = unsigned(4^k - 1)  # all ones

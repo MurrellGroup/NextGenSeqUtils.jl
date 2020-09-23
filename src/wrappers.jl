@@ -36,7 +36,7 @@ function usearch_ref(inFastXPath, outFastaPath, referenceString;
                      divergence=0.9)
     tempRefPath = "/tmp/usearch9tempRefFile"
     tempOutPath = "/tmp/usearch9tempOutFile"
-    write_fasta(tempRefPath,[DNASequence(referenceString)])
+    write_fasta(tempRefPath,[LongDNASeq(referenceString)])
     run(`$(PATHS.usearch) -usearch_global $inFastXPath -db $tempRefPath -id $divergence -fastapairs $tempOutPath -strand both`)
     names, seqs = read_fasta_with_names(tempOutPath)
     names2nd = [names[i * 2 - 1] for i in 1:Int64(round(length(names) / 2))]

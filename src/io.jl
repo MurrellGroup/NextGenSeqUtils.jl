@@ -21,22 +21,15 @@ end
 """
     read_fasta(filename; seqtype=String)
 
-Read .fasta file contents, parse, and return sequences as type `seqtype`
+Read .fasta file contents, parse, and return names and sequences as type `seqtype`.
 """
 function read_fasta(filename; seqtype=String)
     records = read_fasta_records(filename)
-    return seqtype[FASTA.sequence(seqtype, r) for r in records]
-end
-
-"""
-    read_fasta_with_names(filename; seqtype=String)
-
-Read .fasta file contents, parse, and return names and sequences as type `seqtype`.
-"""
-function read_fasta_with_names(filename; seqtype=String)
-    records = read_fasta_records(filename)
     return [FASTA.identifier(r) for r in records], seqtype[FASTA.sequence(seqtype, r) for r in records]
 end
+
+#for legacy code
+const read_fasta_with_names = read_fasta
 
 """
     read_fasta_with_names_in_other_order(filename; seqtype=String)
@@ -117,15 +110,15 @@ end
 
 """
     write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
-                     names=String[], DNASeqType = false)
+                     names=String[], LongCharSequence = false)
 
 Write given sequences, phreds, names to .fastq file with given file path.
 If `names` not provided, gives names 'seq_1', etc.
 """
 function write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
-                     names=String[], DNASeqType = false)
-    if !DNASeqType
-        seqs = [DNASequence(s) for s in seqs]
+                     names=String[], LongCharSequence = false)
+    if !LongCharSequence
+        seqs = [LongCharSequence(s) for s in seqs]
     end
     stream = open(FASTQ.Writer, filename)
     i = 0

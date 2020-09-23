@@ -7,6 +7,8 @@ import BioSequences: reverse_complement
 using Distributions
 using StatsBase
 using Distances
+using FASTX
+
 
 #Uncomment when pull request to METADATA is completed by Multivar
 #using MultivariateStats
