@@ -8,7 +8,7 @@ function dist_matrix(distr1, distr2; dist_met = kmer_seeded_edit_dist)
     if distr1 == distr2
         return symmetric_dist_matrix(distr1, dist_met = dist_met)
     end
-        
+
     distances = zeros(length(distr1), length(distr2))
     for i in 1:length(distr1)
         for j in 1:length(distr2)
@@ -21,7 +21,7 @@ end
 """
     symmetric_dist_matrix(distr; dist_met = kmer_seeded_edit_dist)
 
-Similar to dist_matrix but where distr1 == distr2. 
+Similar to dist_matrix but where distr1 == distr2.
 Automatically called by dist_matrix if the two distributions are identical.
 """
 function symmetric_dist_matrix(distr; dist_met = kmer_seeded_edit_dist)
@@ -149,8 +149,8 @@ end
 
 Returns the complement of the reverse of given nucleotide sequence.
 """
-function reverse_complement(dna_string::String)
-    return String(reverse_complement(LongCharSeq(dna_string)))
+function NextGenSeqUtils.reverse_complement(dna_string::String)
+    return String(BioSequences.reverse_complement(LongDNASeq(dna_string)))
 end
 
 """
@@ -182,8 +182,8 @@ end
 """
     trim_ends_indices(seq, ref; edge_reduction=0.1)
 
-Align `seq` to `ref` with default low penalties for gaps on ends, 
-and trim insertions on the ends of `seq`. 
+Align `seq` to `ref` with default low penalties for gaps on ends,
+and trim insertions on the ends of `seq`.
 Returns (start, stop) indices.
 """
 function trim_ends_indices(seq, ref; edge_reduction=0.1)
@@ -308,7 +308,7 @@ end
 """
     freq(vec, elem)
 
-Return the frequency of given element in given array; 
+Return the frequency of given element in given array;
 if the element is not present, return 0.0.
 """
 function freq(vec, elem)
@@ -322,7 +322,7 @@ end
 """
     sorted_freqs(vec)
 
-Return tuples of (freq, elem) of unique elements of `vec` 
+Return tuples of (freq, elem) of unique elements of `vec`
 in order of decreasing frequency.
 """
 function sorted_freqs(vec)
@@ -334,7 +334,7 @@ end
 """
     freq_dict_print(dictin; thresh=0)
 
-Prints frequency:element of elements of `dictin` above given threshold, 
+Prints frequency:element of elements of `dictin` above given threshold,
 where `dictin` is a proportionmap of elements (see `proportionmap` in StatsBase).
 """
 function freq_dict_print(dictin; thresh=0)
@@ -406,5 +406,3 @@ const nl43env = "GAGCAGAAGACAGTGGCAATGAGAGTGAAGGAGAAGTATCAGCACTTGTGGAGATGGGGGTGG
 "GGGTGGGAAGCCCTCAAATATTGGTGGAATCTCCTACAGTATTGGAGTCAGGAACTAAAGAATAGTGCTGTTAACTT"*
 "GCTCAATGCCACAGCCATAGCAGTAGCTGAGGGGACAGATAGGGTTATAGAAGTATTACAAGCAGCTTATAGAGCTA"*
 "TTCGCCACATACCTAGAAGAATAAGACAGGGCTTGGAAAGGATTTTGCTATAAGATGGGTGGCAAGTGG";
-
-
