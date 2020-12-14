@@ -94,10 +94,10 @@ function read_fastq(filename; seqtype=String, min_length=nothing, max_length=not
     for record in records
 		if err_rate != nothing && mean(phred_to_p(Array{Int8,1}(FASTQ.quality(record, :sanger)))) > err_rate
 			continue
-		end	
+		end
 		if min_length != nothing && length(FASTQ.sequence(seqtype, record)) < min_length
 			continue
-		end	
+		end
 		if max_length != nothing && length(FASTQ.sequence(seqtype, record)) > max_length
 			continue
         end
@@ -118,7 +118,7 @@ If `names` not provided, gives names 'seq_1', etc.
 function write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
                      names=String[], LongSequence = false)
     if !LongSequence
-        seqs = [LongCharSequence(s) for s in seqs]
+        seqs = [LongCharSeq(s) for s in seqs]
     end
     stream = open(FASTQ.Writer, filename)
     i = 0
