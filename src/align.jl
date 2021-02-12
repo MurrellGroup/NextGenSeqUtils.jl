@@ -1182,14 +1182,14 @@ end
 
 """
     affine_nw_align(s1::String, s2::String; gap_open = -2.0, gap_extend = -0.2, match_cost = 1.0, mismatch_cost = -1.0)
-
 Performs full slow affine gap alignment. No tricks. No optimization. Use sparingly. Should likely be combined with kmer seeding.
 """
-function affine_nw_align(s1::String, s2::String;
+function NextGenSeqUtils.affine_nw_align(s1::String, s2::String;
     gap_open = -2.0,
     gap_extend = -0.2,
     match_cost = 1.0,
-    mismatch_cost = -1.0)
+    mismatch_cost = -1.0,
+    edge_reduction = 1.0)
    
     s1arr = collect(s1)  # vertical
     s1len = length(s1arr)
@@ -1200,12 +1200,12 @@ function affine_nw_align(s1::String, s2::String;
     IX = zeros(s1len+1, s2len+1)
     IY = zeros(s1len+1, s2len+1)
 
-    IX[:,1] .= gap_open .+ gap_extend * (0:s1len)
+    IX[:,1] .= gap_open .+ edge_reduction * gap_extend * (0:s1len)
     IX[1,:] .= -Inf * [1:s2len+1;]
-    IY[1,:] .= gap_open .+ gap_extend * (0:s2len)
+    IY[1,:] .= gap_open .+ edge_reduction * gap_extend * (0:s2len)
     IY[:,1] .= -Inf * [1:s1len+1;]
-    M[1:end,1] .= gap_open .+ gap_extend * (0:s1len) #Not sure about this.
-    M[1,1:end] .= gap_open .+ gap_extend * (0:s2len) #Not sure about this.
+    M[1:end,1] .= gap_open .+ edge_reduction * gap_extend * (0:s1len) #Not sure about this.
+    M[1,1:end] .= gap_open .+ edge_reduction * gap_extend * (0:s2len) #Not sure about this.
     
     traceM = zeros(Int, s1len+1, s2len+1)
     traceIX = zeros(Int, s1len+1, s2len+1)
@@ -1236,11 +1236,11 @@ function affine_nw_align(s1::String, s2::String;
             M[i,j],traceM[i,j] = findmax([diagM,IX2M,IY2M]) #1: stay in M. 2: come from IX. 3: come from IY
             
             M2IX = M[i-1, j] + gap_open
-            IXextend = IX[i-1, j] + gap_extend
+            IXextend = IX[i-1, j] + gap_extend * ifelse(i < s2len+1, 1.0, edge_reduction)
             IX[i,j],traceIX[i,j] = findmax([M2IX,IXextend]) #1: gap open. 2: gap extend
             
             M2IY = M[i, j-1] + gap_open
-            IYextend = IY[i, j-1] + gap_extend
+            IYextend = IY[i, j-1] + gap_extend * ifelse(i < s1len+1, 1.0, edge_reduction)
             IY[i,j],traceIY[i,j] = findmax([M2IY,-Inf,IYextend]) #1: gap open. 3: gap extend
               
         end
@@ -1317,6 +1317,7 @@ end
 
 Aligns two profiles, using an affine gap alignment strategy, inserting gap_elem(s1) gap elements wherever indicated.
 "distfunc" should be "profile_cost" if you're using seqs2profile() to get profiles from sequence alignments.
+ToDo: Add edge_reduction factor into profile_affine_align 
 
 Usage:
 nom1,seqs1 = read_fasta_with_names("alignment1.fasta");
