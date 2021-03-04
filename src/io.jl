@@ -131,3 +131,49 @@ function write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
     end
     close(stream)
 end
+
+#------Chunked IO funcions--------
+
+"""
+function chunked_fastq_apply(fpath, func::Function; chunk_size=10000, f_kwargs = [], verbose = false)
+
+Pass a function of the form `func(seqs::Array{Any,1}, phreds::Array{Phred,1}, names::Array{Any,1})` to apply to a large FASTQ file chunk by chunk.
+The input file can be Gzipped or uncompressed. Additional kwargs can be passed to the function via f_kwargs.
+"""
+function chunked_fastq_apply(fpath, func::Function; chunk_size=10000, f_kwargs = [], verbose = false)
+	if endswith(fpath, ".gz")
+    	reader = FASTQ.Reader(GzipDecompressorStream(open(fpath)))
+	else
+		reader = FASTQ.Reader(open(fpath))
+	end
+	if !hasmethod(func, Tuple{Array{Any,1}, Array{Phred,1}, Array{Any,1}})
+		@error "Function argument must accept func(seqs::Array{Any,1}, phreds::Array{Phred,1}, names::Array{Any,1})!"
+	end
+    seqs, phreds, names = [], Vector{Phred}[], []
+    i = 0
+    record = FASTQ.Record()
+	results = []
+    while !eof(reader)
+        read!(reader, record)
+        push!(seqs, FASTQ.sequence(String, record))
+        push!(phreds, FASTQ.quality(record, :sanger))
+        push!(names, FASTQ.identifier(record))
+        i += 1
+        if i == chunk_size
+            #apply func...
+            res = func(seqs, phreds, names; f_kwargs...)
+			push!(results, res)
+            seqs, phreds, names = [], Vector{Phred}[], []
+            i = 0
+            if verbose print(".") end
+        end
+    end
+    close(reader)
+    if i > 0
+        #apply func...
+        res = func(seqs, phreds, names; f_kwargs...)
+		push!(results, res)
+    end
+    if verbose print(".") end
+	return results
+end

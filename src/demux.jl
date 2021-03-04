@@ -50,7 +50,7 @@ function IUPAC_nuc_edit_dist(s1::String, s2::String; edge_reduction = 0.9999)
     mismatch_cost = -1.0
     match_cost = 0.0
 
-    
+
     s1numArr = toIUPACnum(s1)
     s2numArr = toIUPACnum(s2)
     s1arr = collect(s1)  # vertical
@@ -109,7 +109,7 @@ function IUPAC_nuc_nw_align(s1::String, s2::String; edge_reduction = 0.9999)
     mismatch_cost = -1.0
     match_cost = 0.0
 
-    
+
     s1numArr = toIUPACnum(s1)
     s2numArr = toIUPACnum(s2)
     s1arr = collect(s1)  # vertical
@@ -234,10 +234,10 @@ function banded_edit_dist(s1::String, s2::String; edge_reduction = 0.99, band_co
     del_cost = -1.0  # V : vertical
     mismatch_cost = -1.0
     match_cost = 1.0
-    
+
     s1arr = collect(s1)  # vertical
     s2arr = collect(s2)  # horizontal
-    
+
     # dimension difference added to band length on one side
     # to give padding for large sequence length differences
     dim_diff = length(s1arr) - length(s2arr)
@@ -263,30 +263,30 @@ function banded_edit_dist(s1::String, s2::String; edge_reduction = 0.99, band_co
             if !(in_band(i, j, bandwidth, dim_diff))
                 break
             end
-            
+
             if in_band(i-1, j-1, bandwidth, dim_diff) && s1arr[i-1] == s2arr[j-1]
                 diag = get_band_val(arr, i-1, j-1, bandwidth, dim_diff) + match_cost
             else
                 diag = get_band_val(arr, i-1, j-1, bandwidth, dim_diff) + mismatch_cost
             end
-            
+
             # to handle the lower edge penalties.
             delMult = (i == length(s1arr)+1) ? edge_reduction : 1
             insMult = (j == length(s2arr)+1) ? edge_reduction : 1
 
-            ins = in_band(i-1, j, bandwidth, dim_diff) ? 
+            ins = in_band(i-1, j, bandwidth, dim_diff) ?
                     (get_band_val(arr, i-1, j, bandwidth, dim_diff)+(ins_cost*insMult)) : NaN
-            del = in_band(i, j-1, bandwidth, dim_diff) ? 
+            del = in_band(i, j-1, bandwidth, dim_diff) ?
                     (get_band_val(arr, i, j-1, bandwidth, dim_diff)+(del_cost*delMult)) : NaN
 
             scores = [diag, del, ins]
             best = findmax(scores)[2]
             add_to_band!(arr, scores[best], i, j, bandwidth, dim_diff)
-            add_to_band!(traceArr, best, i-1, j-1, bandwidth, dim_diff)                                         
+            add_to_band!(traceArr, best, i-1, j-1, bandwidth, dim_diff)
         end
     end
-    alignedScore = get_band_val(arr, length(s1arr)+1, length(s2arr)+1, bandwidth, dim_diff)                                                                      
-    
+    alignedScore = get_band_val(arr, length(s1arr)+1, length(s2arr)+1, bandwidth, dim_diff)
+
     return alignedScore
 end
 
@@ -355,7 +355,7 @@ export fast_primer_match
 function fast_primer_match(seqs,primers; tol_one_error = true)
     #Only tolerates a single bp difference between primer and seq
     #Assumes all filtering primers are the same length.
-    #Note this doesn't mean that the primers actually had to be the same length! 
+    #Note this doesn't mean that the primers actually had to be the same length!
     l = length(primers[1])
     matches = zeros(Int,length(seqs))
     noisy_primer_map = Dict{String,Int}()
@@ -400,7 +400,7 @@ function demux_dict(seqs,fwd_primers,rev_primers; verbose = true, phreds = nothi
         rev_comp_bool = fwd_matches .< 0
         keepers = abs.(fwd_matches) .> 0
         fwd_matches = abs.(fwd_matches)
-        pair_keeps = fwd_matches[keepers]        
+        pair_keeps = fwd_matches[keepers]
     else
          keepers,fwd_matches,rev_matches,rev_comp_bool = fast_primer_pair_match(seqs,fwd_primers,rev_primers,tol_one_error=tol_one_error)
         f_keeps = fwd_matches[keepers]
@@ -414,7 +414,7 @@ function demux_dict(seqs,fwd_primers,rev_primers; verbose = true, phreds = nothi
             println(s[1], " => ", s[2])
         end
     end
-    
+
     if phreds == nothing
         seq_dict = Dict()
         for pair in sorted_pairs
@@ -526,7 +526,7 @@ function sliding_demux_dict(seqs,fwd_primers,window::Int,slide_by::Int; verbose 
     rev_comp_bool = fwd_matches .< 0
     keepers = abs.(fwd_matches) .> 0
     fwd_matches = abs.(fwd_matches)
-    pair_keeps = fwd_matches[keepers]        
+    pair_keeps = fwd_matches[keepers]
     pair_counts = countmap(pair_keeps)
     sorted_pairs = sort([(k,pair_counts[k]) for k in keys(pair_counts)])
     if verbose
@@ -567,5 +567,68 @@ function sliding_demux_dict(seqs,fwd_primers,window::Int,slide_by::Int; verbose 
             end
         end
         return seq_dict
+    end
+end
+
+#------Chunked demux funcions--------
+# Currently not exported.
+"""
+function chunked_fastq_filter_demux(seqs, phreds, names;
+    demux_dir = "demux", fwd_primers = String[], rev_primers = String[],
+    verbose = false, tol_one_error = true, primer_lookup = nothing, error_rate = 0.01,
+    min_length = 30, max_length = 1000000, label_prefix = "seq", error_out = true)
+
+Intended to be passed to `chunked_fastq_apply()` for quality/length filtering and demultiplexing of
+FASTQ files in one pass.
+"""
+function chunked_fastq_filter_demux(seqs, phreds, names;
+    demux_dir = "demux", fwd_primers = String[], rev_primers = String[],
+    verbose = false, tol_one_error = true, primer_lookup = nothing, error_rate = 0.01,
+    min_length = 30, max_length = 1000000, label_prefix = "seq", error_out = true)
+
+    #filter...
+    lengths = length.(seqs)
+    mean_errors = [mean(phred_to_p.(phred)) for phred in phreds]
+    inds = [1:length(seqs);][(lengths .< max_length) .& (lengths .> min_length) .& (mean_errors .< error_rate)]
+
+    if error_out == true
+        filtered_names = ["$label_prefix$(i)|ee=$(mean_errors[i])" for i in inds]
+    else
+        filtered_names = ["$label_prefix$(i)" for i in 1:length(inds)]
+    end
+
+    filtered_seqs, filtered_phreds = seqs[inds], phreds[inds]
+
+    #demux...
+    demux_dic = demux_dict(filtered_seqs, fwd_primers, rev_primers;
+        phreds = filtered_phreds, verbose = verbose, tol_one_error = tol_one_error
+    )
+    #write...
+    for (i, fwd_primer) in enumerate(fwd_primers)
+        for (j, rev_primer) in enumerate(rev_primers)
+            if haskey(demux_dic,(i,j))
+                if isnothing(primer_lookup)
+                    outpath = demux_dir*"/$(fwd_primer)_$(rev_primer).fastq"
+                else
+                    if haskey(primer_lookup,(fwd_primer,rev_primer))
+                        ID = primer_lookup[fwd_primer,rev_primer]
+                    else
+                        ID = "UNKNOWN"
+                    end
+                    outpath = demux_dir*"/$(ID)_$(fwd_primer)_$(rev_primer).fastq"
+                end
+                result = demux_dic[i,j]
+                records = FASTQ.Record.(
+                    filtered_names[getindex.(result, 3)],
+                    getindex.(result, 1),
+                    getindex.(result, 2)
+                    )
+                writer = FASTQ.Writer(open(outpath, "a"))
+                for record in records
+                    write(writer, record)
+                end
+                close(writer)
+            end
+        end
     end
 end

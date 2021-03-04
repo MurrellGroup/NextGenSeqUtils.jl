@@ -1,6 +1,6 @@
-module NextGenSeqUtils 
+module NextGenSeqUtils
     include("include_all.jl")
-    
+
 	export
 
     # align.jl
@@ -51,6 +51,7 @@ module NextGenSeqUtils
     write_fasta,
     read_fastq,
     write_fastq,
+	chunked_fastq_apply,
 
     # kmers.jl
 
@@ -129,9 +130,8 @@ module NextGenSeqUtils
 
     #evodist
     estimate_distance,
- 
-    #levenshtein
-    levenshtein    
-	
-end # module
 
+    #levenshtein
+    levenshtein
+
+end # module

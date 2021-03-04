@@ -8,6 +8,7 @@ using Distributions
 using StatsBase
 using Distances
 using FASTX
+using CodecZlib: GzipDecompressorStream
 
 
 #Uncomment when pull request to METADATA is completed by Multivar
