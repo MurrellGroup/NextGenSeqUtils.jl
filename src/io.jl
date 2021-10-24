@@ -15,6 +15,7 @@ function read_fasta_records(filename)
     for entry in stream
         push!(records, entry)
     end
+    close(stream)
     return records
 end
 
@@ -78,6 +79,7 @@ function read_fastq_records(filename)
         end
         push!(records, record)
     end
+    close(stream)
     return records
 end
 
