@@ -6,7 +6,6 @@
 
 """
     read_fasta_records(filename)
-
 Read .fasta file contents.
 """
 function read_fasta_records(filename)
@@ -21,7 +20,6 @@ end
 
 """
     read_fasta(filename; seqtype=String)
-
 Read .fasta file contents, parse, and return names and sequences as type `seqtype`.
 """
 function read_fasta(filename; seqtype=String)
@@ -34,7 +32,6 @@ const read_fasta_with_names = read_fasta
 
 """
     read_fasta_with_names_in_other_order(filename; seqtype=String)
-
 Read .fasta file contents, parse, and return sequences as type `seqtype` with names.
 Now that's what I call convenience.
 """
@@ -44,18 +41,17 @@ function read_fasta_with_names_in_other_order(filename::String; seqtype=String)
 end
 
 """
-    write_fasta(filename::String, seqs; names = String[])
-
+    write_fasta(filename::String, seqs; names = String[], append=false)
 Write given `seqs` and optional `names` to a .fasta file with given filepath.
 """
-function write_fasta(filename::String, seqs; names = String[])
+function write_fasta(filename::String, seqs; names = String[], append=false)
     if length(names) > 0 && length(names) != length(seqs)
         error("number of sequences does not match number of names")
     end
     if length(names) == 0
         names = ["seq_$i" for i in 1:length(seqs)]
     end
-    stream = open(FASTA.Writer, filename)
+    stream = open(FASTA.Writer, filename, append=append)
     for (name, seq) in zip(names, seqs)
         write(stream, FASTA.Record(name, seq))
     end
@@ -67,7 +63,6 @@ end
 
 """
     read_fastq_records(filename)
-
 Read .fastq file contents.
 """
 function read_fastq_records(filename)
@@ -85,7 +80,6 @@ end
 
 """
     read_fastq(filename; seqtype=String)
-
 Read .fastq file contents, parse, and return sequences as `seqtype` type, phreds, and names.
 """
 function read_fastq(filename; seqtype=String, min_length=nothing, max_length=nothing, err_rate=nothing)
@@ -103,7 +97,7 @@ function read_fastq(filename; seqtype=String, min_length=nothing, max_length=not
 		if max_length != nothing && length(FASTQ.sequence(seqtype, record)) > max_length
 			continue
         end
-		push!(seqs, FASTQ.sequence(seqtype, record))
+	push!(seqs, FASTQ.sequence(seqtype, record))
         push!(phreds, FASTQ.quality(record, :sanger))
         push!(names, FASTQ.identifier(record))
     end
@@ -112,17 +106,17 @@ end
 
 """
     write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
-                     names=String[], LongSequence = false)
-
+                     names=String[], LongSequence = false, append = false)
 Write given sequences, phreds, names to .fastq file with given file path.
 If `names` not provided, gives names 'seq_1', etc.
 """
 function write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
-                     names=String[], LongSequence = false)
+                     names=String[], LongSequence = false,
+                     append = false)
     if !LongSequence
-        seqs = [LongCharSeq(s) for s in seqs]
+        seqs = [BioSequences.LongDNA{4}(s) for s in seqs]
     end
-    stream = open(FASTQ.Writer, filename)
+    stream = open(FASTQ.Writer, filename, append=append)
     i = 0
     if length(names) != length(seqs)
         names = [string("seq_", i) for i in 1:length(seqs)]
@@ -132,29 +126,27 @@ function write_fastq(filename, seqs, phreds::Vector{Vector{Phred}};
         write(stream, FASTQ.Record(n, s, q))
     end
     close(stream)
-end
+end			
 
 #------Chunked IO funcions--------
 
 """
 function chunked_fastq_apply(fpath, func::Function; chunk_size=10000, f_kwargs = [], verbose = false)
-
-Pass a function of the form `func(seqs::Array{Any,1}, phreds::Array{Phred,1}, names::Array{Any,1})` to apply to a large FASTQ file chunk by chunk.
+Pass a function of the form `func(chunk, chunk_size, seqs::Array{Any,1}, phreds::Array{Phred,1}, names::Array{Any,1})` 
+to apply to a large FASTQ file chunk by chunk.
 The input file can be Gzipped or uncompressed. Additional kwargs can be passed to the function via f_kwargs.
 """
 function chunked_fastq_apply(fpath, func::Function; chunk_size=10000, f_kwargs = [], verbose = false)
-	if endswith(fpath, ".gz")
+    if endswith(fpath, ".gz")
     	reader = FASTQ.Reader(GzipDecompressorStream(open(fpath)))
-	else
+    else
 		reader = FASTQ.Reader(open(fpath))
-	end
-	if !hasmethod(func, Tuple{Array{Any,1}, Array{Phred,1}, Array{Any,1}})
-		@error "Function argument must accept func(seqs::Array{Any,1}, phreds::Array{Phred,1}, names::Array{Any,1})!"
-	end
+    end
     seqs, phreds, names = [], Vector{Phred}[], []
+    chunk = 0				
     i = 0
     record = FASTQ.Record()
-	results = []
+    read_counts = [0, 0, 0]
     while !eof(reader)
         read!(reader, record)
         push!(seqs, FASTQ.sequence(String, record))
@@ -163,8 +155,8 @@ function chunked_fastq_apply(fpath, func::Function; chunk_size=10000, f_kwargs =
         i += 1
         if i == chunk_size
             #apply func...
-            res = func(seqs, phreds, names; f_kwargs...)
-			push!(results, res)
+	    chunk += 1						
+            read_counts += func(chunk, chunk_size, seqs, phreds, names; f_kwargs...)
             seqs, phreds, names = [], Vector{Phred}[], []
             i = 0
             if verbose print(".") end
@@ -173,9 +165,9 @@ function chunked_fastq_apply(fpath, func::Function; chunk_size=10000, f_kwargs =
     close(reader)
     if i > 0
         #apply func...
-        res = func(seqs, phreds, names; f_kwargs...)
-		push!(results, res)
+	chunk += 1					
+        read_counts += func(chunk, chunk_size, seqs, phreds, names; f_kwargs...)
     end
     if verbose print(".") end
-	return results
+    return read_counts
 end
