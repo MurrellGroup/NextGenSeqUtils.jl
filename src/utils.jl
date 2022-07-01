@@ -58,12 +58,11 @@ function degap(s::String)
 end
 
 """
-    degap(s::LongCharSeq)
-
+    degap(s::LongSequence)
 Returns given string without '-' gap symbols.
 """
-function degap(s::LongCharSeq)
-    return LongCharSeq(degap(String(s)))
+function degap(s::LongSequence)
+    return LongDNASeq(degap(String(s)))
 end
 
 """
