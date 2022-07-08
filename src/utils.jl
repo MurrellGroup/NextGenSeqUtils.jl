@@ -208,7 +208,7 @@ end
 Return amino acid string translation of nucleotide sequence using BioSequences conversion.
 """
 function translate_to_aa(s::String)
-    rna = convert(LongRNASeq, LongDNASeq(s))
+    rna = convert(LongRNASeq, LongDNA{4}(s))
     return string(translate(rna))
 end
 
