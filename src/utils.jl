@@ -149,7 +149,7 @@ end
 Returns the complement of the reverse of given nucleotide sequence.
 """
 function NextGenSeqUtils.reverse_complement(dna_string::String)
-    return String(BioSequences.reverse_complement(LongDNASeq(dna_string)))
+	return String(reverse_complement(BioSequences.LongDNA{4}(dna_string)))
 end
 
 """
