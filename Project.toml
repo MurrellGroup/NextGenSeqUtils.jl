@@ -22,5 +22,5 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 test = ["Test"]
 
 [compat]
-BioSequences = "2.06"
-FASTX = "1.1.3"
+BioSequences = "2.0.5, 3"
+FASTX = "1.1.3, 2"
