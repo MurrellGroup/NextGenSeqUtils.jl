@@ -69,7 +69,7 @@ function read_fastq_records(filename)
     stream = open(FASTQ.Reader, filename)
     records = FASTQ.Record[]
     for record in stream
-        if any([q < 0 for q in FASTQ.quality(record, :sanger)])
+        if any([q < 0 for q in collect(FASTQ.quality_scores(record))])
             error("$(record.name) in $filename contains negative phred values")
         end
         push!(records, record)
@@ -88,7 +88,7 @@ function read_fastq(filename; seqtype=String, min_length=nothing, max_length=not
     phreds = Vector{Phred}[]
     names = String[]
     for record in records
-		if err_rate != nothing && mean(phred_to_p(Array{Int8,1}(FASTQ.quality(record, :sanger)))) > err_rate
+		if err_rate != nothing && mean(phred_to_p(Array{Int8,1}(collect(FASTQ.quality_scores(record))))) > err_rate
 			continue
 		end
 		if min_length != nothing && length(FASTQ.sequence(seqtype, record)) < min_length
@@ -98,7 +98,7 @@ function read_fastq(filename; seqtype=String, min_length=nothing, max_length=not
 			continue
         end
 	push!(seqs, FASTQ.sequence(seqtype, record))
-        push!(phreds, FASTQ.quality(record, :sanger))
+        push!(phreds, collect(FASTQ.quality_scores(record)))
         push!(names, FASTQ.identifier(record))
     end
     return seqs, phreds, names
@@ -150,7 +150,7 @@ function chunked_fastq_apply(fpath, func::Function; chunk_size=10000, f_kwargs =
     while !eof(reader)
         read!(reader, record)
         push!(seqs, FASTQ.sequence(String, record))
-        push!(phreds, FASTQ.quality(record, :sanger))
+        push!(phreds, collect(FASTQ.quality_scores(record)))
         push!(names, FASTQ.identifier(record))
         i += 1
         if i == chunk_size
