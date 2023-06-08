@@ -69,7 +69,7 @@ function read_fastq_records(filename)
     stream = open(FASTQ.Reader, filename)
     records = FASTQ.Record[]
     for record in stream
-        if any([q < 0 for q in record.quality])
+        if any([q < 0 for q in FASTQ.quality(record, :sanger)])
             error("$(record.name) in $filename contains negative phred values")
         end
         push!(records, record)
